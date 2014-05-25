@@ -26,7 +26,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\..\..\AppData\Local\Microsoft\Windows Sidebar\Gadgets\New.gadget\</OutputPath>
+    <OutputPath>..\..\..\..\..\AppData\Local\Microsoft\Windows Sidebar\Gadgets\SystemInfo.gadget\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -43,8 +43,12 @@
     <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes.cs" />
-    <Compile Include="Code.cs" />
+    <Compile Include="DataManager.cs" />
+    <Compile Include="DataReturner.cs" />
+    <Compile Include="DataClasses\Core.cs" />
+    <Compile Include="DataClasses\Drive.cs" />
+    <Compile Include="DataClasses\NetworkInterface.cs" />
+    <Compile Include="IWMI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
