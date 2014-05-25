@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gadget>
+	<name>System Info</name>
+	<version>1.0</version>
+	<hosts>
+		<host name="sidebar">
+			<base type="HTML" apiVersion="1.0.0" src="main.html"/>
+			<permissions>Full</permissions>
+			<platform minPlatformVersion="1.0"/>
+		</host>
+	</hosts>
+</gadget>
