@@ -51,12 +51,16 @@ function AvailDrivesCount()
 
 function Update()
 {	
+	j = 0;
 	for (i = 0; i < NetLib.GetCoresCount() ; i++)
 	{
 		temp = NetLib.GetProcessorData(i);
 
 		if (temp.name != "_Total")
-			CpuData['Core' + i] = parseInt(temp.usePercent)
+		{
+			CpuData['Core' + j] = parseInt(temp.usePercent);
+			j++;
+		}
 		else
 			CpuData.AllCores = parseInt(temp.usePercent);
 	}
@@ -88,8 +92,7 @@ function Update()
 			PaintHdd(i);
 		}
 	}
-
-	if (HddData.Count < drivesCount)
+	else if (HddData.Count < drivesCount)
 	{
 		PaintHdd(HddData.Count);
 		HddData['Drive' + HddData.Count] = {
