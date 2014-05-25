@@ -14,13 +14,11 @@ function Start()
 	CalculateHeight();
 
 	Paint();
-
-	debugger;
 	NetLib = GetLibrary();
 	//NetLib2 = new ActiveXObject("WMI.GetData");
 	NetLib.Start();
 
-	setTimeout(function() {setInterval(Update, 1000)}, 1000);
+	setTimeout(function() {setInterval(Update, 1000)}, 5000);
 	//setInterval(UpdateWithoutWMI, 1000);
 	//setInterval(DisplayData, 1000);
 }
