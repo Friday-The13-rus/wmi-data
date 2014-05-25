@@ -15,6 +15,7 @@ function Start()
 
 	Paint();
 
+	debugger;
 	NetLib = GetLibrary();
 	//NetLib2 = new ActiveXObject("WMI.GetData");
 	NetLib.Start();
@@ -66,7 +67,7 @@ function Update()
 	RamData.UseRam = RamData.Total - RamData.Free;
 	RamData.PercentUseRam = (100 * RamData.UseRam / RamData.Total).toFixed();
 
-	drivesCount = NetLib.GetDriversCount();
+	drivesCount = NetLib.GetDrivesCount();
 	if (HddData.Count > drivesCount)
 	{
 		hddDiv.innerHTML = '';
@@ -105,7 +106,7 @@ function Update()
 
 	for (i = 0; i < drivesCount ; i++)
 	{
-		temp = NetLib.GetDriverData(i);
+		temp = NetLib.GetDriveData(i);
 
 		HddData['Drive' + i].Name = temp.name;
 		HddData['Drive' + i].FreeSpace = formatBytes(temp.freeSpace, 'b');
