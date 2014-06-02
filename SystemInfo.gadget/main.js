@@ -66,8 +66,8 @@ function Update()
 	}
 
 	RamData.Free = System.Machine.availableMemory;
-	RamData.UseRam = RamData.Total - RamData.Free;
-	RamData.PercentUseRam = (100 * RamData.UseRam / RamData.Total).toFixed();
+	RamData.Use = RamData.Total - RamData.Free;
+	RamData.PercentUse = (100 * RamData.Use / RamData.Total).toFixed();
 
 	drivesCount = NetLib.GetDrivesCount();
 	if (HddData.Count > drivesCount)
@@ -86,6 +86,8 @@ function Update()
 				Name: 'null:',
 				VolumeName: 'null',
 				FreeSpace: '0 байт',
+				UseSpace: '0 байт',
+				Space: '0 байт',
 				ActivePercent: 0,
 				UsePercent: 0
 			}
@@ -99,6 +101,8 @@ function Update()
 			Name: 'null:',
 			VolumeName: 'null',
 			FreeSpace: '0 байт',
+			UseSpace: '0 байт',
+			Space: '0 байт',
 			ActivePercent: 0,
 			UsePercent: 0
 		}
@@ -111,6 +115,8 @@ function Update()
 
 		HddData['Drive' + i].Name = temp.name;
 		HddData['Drive' + i].FreeSpace = formatBytes(temp.freeSpace, 'b');
+		HddData['Drive' + i].Space = formatBytes(temp.space, 'b');
+		HddData['Drive' + i].UseSpace = formatBytes(temp.space - temp.freeSpace, 'b');
 		HddData['Drive' + i].VolumeName = temp.volumeName;
 		HddData['Drive' + i].UsePercent = temp.usePercent;
 		HddData['Drive' + i].ActivePercent = temp.activePercent;
@@ -136,8 +142,8 @@ function UpdateWithoutWMI()
 	CpuData.AllCores = Math.round(tempAllCores/CpuData.CountCores);
 	
 	RamData.Free = System.Machine.availableMemory;
-	RamData.UseRam = RamData.Total - RamData.Free;
-	RamData.PercentUseRam = Math.round(100 * RamData.UseRam / RamData.Total);
+	RamData.Use = RamData.Total - RamData.Free;
+	RamData.PercentUse = Math.round(100 * RamData.Use / RamData.Total);
 	
 	DisplayData();
 }
@@ -163,17 +169,27 @@ function cpu()
 
 function ram()
 {
-	document.getElementById('useRam').innerHTML = formatBytes(RamData.UseRam, 'mb');
-	document.getElementById('percentUseRam').innerHTML = RamData.PercentUseRam + ' %';
-	document.getElementById('percentUseRamWidth').style.width = CalcWidthBar(RamData.PercentUseRam);
+	useRamTemp = formatBytes(RamData.Use, 'mb');
+	document.getElementById('useRam').innerHTML = useRamTemp;
+	document.getElementById('percentUseRam').innerHTML = RamData.PercentUse + ' %';
+	document.getElementById('percentUseRamWidth').style.width = CalcWidthBar(RamData.PercentUse);
+	ramSect.title = 'Всего памяти: ' + formatBytes(RamData.Total, 'mb') + '\r\n' +
+		'Занято памяти: ' + useRamTemp + '\r\n' +
+		'Свободно памяти: ' + formatBytes(RamData.Free, 'mb')
 }
 
 function hdd()
 {
 	for (i = 0; i < HddData.Count; i++)
 	{
-		document.getElementById('Drive' + i + 'Header').onclick = OpenDrive;
-		document.getElementById('Drive' + i + 'Name').innerHTML = HddData['Drive' + i].Name + ' ' + HddData['Drive' + i].VolumeName;
+		drive = document.getElementById('Drive' + i);
+		driveName = HddData['Drive' + i].Name + ' ' + HddData['Drive' + i].VolumeName;
+		drive.onclick = OpenDrive;
+		drive.title = driveName + '\r\n' +
+			'Всего места: ' + HddData['Drive' + i].Space + '\r\n' +
+			'Занято места: ' + HddData['Drive' + i].UseSpace + '\r\n' +
+			'Свободно места: ' + HddData['Drive' + i].FreeSpace;
+		document.getElementById('Drive' + i + 'Name').innerHTML = driveName;
 		document.getElementById('Drive' + i + 'FreeSpace').innerHTML = HddData['Drive' + i].FreeSpace;
 		document.getElementById('Drive' + i + 'UsePerc').innerHTML = HddData['Drive' + i].UsePercent + ' %';
 		document.getElementById('Drive' + i + 'UsePercWidth').style.width = CalcWidthBar(HddData['Drive' + i].UsePercent);
@@ -218,7 +234,7 @@ function CalculateHeight()
 	networkSect.style.height = 18 + 1 * rowHeight;
 	document.body.style.height = parseInt(cpuSect.style.height) + parseInt(ramSect.style.height) + parseInt(hddSect.style.height) + parseInt(networkSect.style.height) + 3;
 	bottom.style.top = parseInt(document.body.style.height) - 10;
-	midle.style.height = parseInt(document.body.style.height) - 20;
+	middle.style.height = parseInt(document.body.style.height) - 20;
 }
 
 function CalcWidthBar(percent)
@@ -260,11 +276,11 @@ function Paint()
 	networkDiv.innerHTML =
 		'<div style="top:' + (0 * rowHeight) + 'px; left:3px;">' +
 			'<img src="image/down.png">' +
-			'<div id="NetReceived" style="left:13px; width:45px"></div>' +
+			'<div id="NetReceived" style="left:13px; width:45px">0 байт</div>' +
 		'</div>' +
 		'<div style="top:' + (0 * rowHeight) + 'px; left:60px;">' +
 			'<img src="image/up.png">' +
-			'<div id="NetSent" style="left:13px; width:45px"></div>' +
+			'<div id="NetSent" style="left:13px; width:45px">0 байт</div>' +
 		'</div>';
 }
 
@@ -272,19 +288,19 @@ function PaintHdd(i)
 {
 	hddDiv.innerHTML +=
 		'<img style="top:' + ((i * 3 + 0) * rowHeight + 3 * (i - 1)) + 'px; left:-1px;" class="divider" src="image/horizontalDivider.png" alt=""/>' +
-		'<div id="Drive' + i + 'Header" style="top:' + (3 * i * (rowHeight + 1)) + 'px; left:0px; width:120px; height:' + (3 * rowHeight) + 'px; ">' +
-		'<div id="Drive' + i + 'Name" style="top:' + 0 * rowHeight + 'px; left:3px; text-overflow: ellipsis;"></div>' +
-		'<div id="Drive' + i + 'FreeSpace" style="top:' + 0 * rowHeight + 'px; right:4px;">0</div>' +
-		'<div id="Drive' + i + 'UsePerc" style="top:' + 1 * rowHeight + 'px; left:3px; width:30px">0 %</div>' +
-		'<div style="top:' + 1 * rowHeight + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-			'<img src="image/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-			'<img id="Drive' + i + 'UsePercWidth" src="image/bars/hdd1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
-		'</div>' +
-		'<div id="Drive' + i + 'ActivePercent" style="top:' + 2 * rowHeight + 'px; left:3px; width:30px">0 %</div>' +
-		'<div style="top:' + 2 * rowHeight + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-			'<img src="image/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-			'<img id="Drive' + i + 'ActivePercentWidth" src="image/bars/hdd2.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
-		'</div>' +
+		'<div id="Drive' + i + '" style="top:' + (3 * i * (rowHeight + 1)) + 'px; left:0px; width:120px; height:' + (3 * rowHeight) + 'px; ">' +
+			'<div id="Drive' + i + 'Name" style="top:' + 0 * rowHeight + 'px; left:3px; text-overflow: ellipsis;">null</div>' +
+			'<div id="Drive' + i + 'FreeSpace" style="top:' + 0 * rowHeight + 'px; right:4px;">0</div>' +
+			'<div id="Drive' + i + 'UsePerc" style="top:' + 1 * rowHeight + 'px; left:3px; width:30px">0 %</div>' +
+			'<div style="top:' + 1 * rowHeight + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
+				'<img src="image/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
+				'<img id="Drive' + i + 'UsePercWidth" src="image/bars/hdd1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+			'</div>' +
+			'<div id="Drive' + i + 'ActivePercent" style="top:' + 2 * rowHeight + 'px; left:3px; width:30px">0 %</div>' +
+			'<div style="top:' + 2 * rowHeight + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
+				'<img src="image/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
+				'<img id="Drive' + i + 'ActivePercentWidth" src="image/bars/hdd2.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+			'</div>' +
 		'</div>';
 }
 
@@ -299,8 +315,8 @@ function CreateObjects()
 
 	RamData.Free = 0;
 	RamData.Total = System.Machine.totalMemory;
-	RamData.UseRam = 0;
-	RamData.PercentUseRam = 0;
+	RamData.Use = 0;
+	RamData.PercentUse = 0;
 
 	HddData.Count = AvailDrivesCount();
 	for (i = 0; i < HddData.Count; i++)
@@ -309,6 +325,8 @@ function CreateObjects()
 			Name: 'null:',
 			VolumeName: 'null',
 			FreeSpace: '0 байт',
+			UseSpace: '0 байт',
+			Space: '0 байт',
 			ActivePercent: 0,
 			UsePercent: 0
 		}
