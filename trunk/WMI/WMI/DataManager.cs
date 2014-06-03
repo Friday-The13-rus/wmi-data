@@ -10,23 +10,23 @@ namespace WMI
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
 	public class DataManager : IDisposable
 	{
-		Timer timer = new Timer();
-		bool disposed = false;
+		private readonly SortedList<string, Core> cores = new SortedList<string, Core>(6);
+		private readonly SortedList<string, Drive> drives = new SortedList<string, Drive>(3);
+		private readonly NetworkInterface network = new NetworkInterface();
 
-		SortedList<string, Drive> drives = new SortedList<string, Drive>(3);
-		SortedList<string, Core> cores = new SortedList<string, Core>(6);
-		NetworkInterface network = new NetworkInterface();
+		private readonly ManagementObjectSearcher drivesPerfSearcher;
+		private readonly ManagementObjectSearcher drivesSearcher;
+		private readonly ManagementObjectSearcher networkSearcher;
+		private readonly ManagementObjectSearcher processorSearcher;
 
-		ManagementObjectSearcher processorSearcher;
-		ManagementObjectSearcher drivesSearcher;
-		ManagementObjectSearcher drivesPerfSearcher;
-		ManagementObjectSearcher networkSearcher;
+		private readonly Timer timer = new Timer();
+		private bool disposed;
 
 		public DataManager(int updateInterval)
 		{
-			ManagementScope scope = new ManagementScope("root\\CIMV2");
+			var scope = new ManagementScope("root\\CIMV2");
 			scope.Connect();
-			EnumerationOptions opt = new EnumerationOptions
+			var opt = new EnumerationOptions
 			{
 				DirectRead = true,
 				EnsureLocatable = false,
@@ -35,10 +35,15 @@ namespace WMI
 				Rewindable = false
 			};
 
-			processorSearcher = new ManagementObjectSearcher(scope, new SelectQuery("SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor"), opt);
-			drivesSearcher = new ManagementObjectSearcher(scope, new SelectQuery("SELECT Name, FreeSpace, VolumeName, Size FROM Win32_LogicalDisk WHERE Access != null"));
-			drivesPerfSearcher = new ManagementObjectSearcher(scope, new SelectQuery("SELECT Name, PercentDiskTime FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk"), opt);
-			networkSearcher = new ManagementObjectSearcher(scope, new SelectQuery("SELECT BytesReceivedPerSec, BytesSentPerSec FROM Win32_PerfFormattedData_Tcpip_NetworkInterface"), opt);
+			processorSearcher = new ManagementObjectSearcher(scope,
+				new SelectQuery("SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor"), opt);
+			drivesSearcher = new ManagementObjectSearcher(scope,
+				new SelectQuery("SELECT Name, FreeSpace, VolumeName, Size FROM Win32_LogicalDisk WHERE Access != null"));
+			drivesPerfSearcher = new ManagementObjectSearcher(scope,
+				new SelectQuery("SELECT Name, PercentDiskTime FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk"), opt);
+			networkSearcher = new ManagementObjectSearcher(scope,
+				new SelectQuery("SELECT BytesReceivedPerSec, BytesSentPerSec FROM Win32_PerfFormattedData_Tcpip_NetworkInterface"),
+				opt);
 
 			timer.Interval = updateInterval;
 			timer.Elapsed += (source, e) => UpdateDrivesInfo();
@@ -53,7 +58,7 @@ namespace WMI
 			GC.SuppressFinalize(this);
 		}
 
-		void Dispose(bool disposing)
+		private void Dispose(bool disposing)
 		{
 			if (!disposed)
 			{
@@ -96,7 +101,7 @@ namespace WMI
 			return network;
 		}
 
-		void UpdateNetworkInfo()
+		private void UpdateNetworkInfo()
 		{
 			foreach (ManagementObject obj in networkSearcher.Get())
 			{
@@ -106,7 +111,7 @@ namespace WMI
 			}
 		}
 
-		void UpdateProcessorInfo()
+		private void UpdateProcessorInfo()
 		{
 			foreach (ManagementObject obj in processorSearcher.Get())
 			{
@@ -116,7 +121,7 @@ namespace WMI
 				Core currentCore;
 				if (!cores.TryGetValue(name, out currentCore))
 				{
-					Core core = new Core(name, percent);
+					var core = new Core(name, percent);
 					cores.Add(name, core);
 				}
 				else
@@ -139,13 +144,14 @@ namespace WMI
 			{
 				string name = obj["Name"].ToString();
 				ulong freeSpace = Convert.ToUInt64(obj["FreeSpace"]);
+				ulong space = Convert.ToUInt64(obj["Size"]);
 				string volumeName = obj["VolumeName"].ToString();
-				byte usePercent = Convert.ToByte(100 * (1 - Convert.ToDouble(obj["FreeSpace"]) / Convert.ToDouble(obj["Size"])));
+				byte usePercent = Convert.ToByte(100 * (1 - (double)freeSpace / space));
 
 				Drive currentDrive;
 				if (!drives.TryGetValue(name, out currentDrive))
 				{
-					Drive drive = new Drive(name, volumeName, freeSpace, usePercent, 0);
+					var drive = new Drive(name, volumeName, freeSpace, space, usePercent, 0);
 					drives.Add(name, drive);
 				}
 				else
