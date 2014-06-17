@@ -15,7 +15,8 @@ img, input , div
     font-family:Segoe UI, Tahoma;
     font-size: 10px;
     text-indent: 0px;
-    position:absolute; 
+    position:absolute;
+	white-space: nowrap;
 }
 .section
 {
