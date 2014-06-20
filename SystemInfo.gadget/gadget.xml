@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <gadget>
 	<name>System Info</name>
+	<author name="RogerUP"/>
 	<version>1.0</version>
+	<description>Выводит на экран такую информацию о системе, как:
+	Загрузка процессора
+	Занятая оперативная память
+	Загрузка и загруженность жестких дисков и других накопителей
+	Скорость получения и передачи данных через интернет соединение</description>
+	<icons>
+		<icon width="256" height="256" src="image\icon.png"/>
+	</icons>
 	<hosts>
 		<host name="sidebar">
 			<base type="HTML" apiVersion="1.0.0" src="main.html"/>

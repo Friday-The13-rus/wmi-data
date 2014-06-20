@@ -1,4 +1,9 @@
-﻿rowHeight = 14
+﻿onerror = Error;
+execScript('Function Message(prompt, title)\r\n'
+    + ' Message = MsgBox(prompt, 16, title)\r\n'
+    + 'End Function', "vbscript");
+
+rowHeight = 14
 widthBar = 80
 
 var CpuData = {}
@@ -9,18 +14,26 @@ var NetData = {}
 function Start()
 {
 	//debugger;
-
+	
 	CreateObjects();
 	CalculateHeight();
 
 	Paint();
 	NetLib = GetLibrary();
-	//NetLib2 = new ActiveXObject("WMI.GetData");
 	NetLib.Start();
 
 	setTimeout(function() {setInterval(Update, 1000)}, 5000);
 	//setInterval(UpdateWithoutWMI, 1000);
 	//setInterval(DisplayData, 1000);
+}
+
+function Error(message, source, lineno)
+{
+	line = 'File: ' + source + '; Line ' + lineno + '\r\n' +
+		'Message:\r\n' + message;
+	System.Diagnostics.EventLog.writeEntry(line, 1);
+	
+	Message(line, 'Error!');
 }
 
 function Stop()
@@ -189,8 +202,13 @@ function hdd()
 			'Всего места: ' + HddData['Drive' + i].Space + '\r\n' +
 			'Занято места: ' + HddData['Drive' + i].UseSpace + '\r\n' +
 			'Свободно места: ' + HddData['Drive' + i].FreeSpace;
-		document.getElementById('Drive' + i + 'Name').innerHTML = driveName;
-		document.getElementById('Drive' + i + 'FreeSpace').innerHTML = HddData['Drive' + i].FreeSpace;
+
+		nameDiv = document.getElementById('Drive' + i + 'Name');
+		spaceDiv = document.getElementById('Drive' + i + 'FreeSpace');
+		
+		nameDiv.innerHTML = driveName;
+		spaceDiv.innerHTML = HddData['Drive' + i].FreeSpace;
+		nameDiv.style.width = 120 - 7 - spaceDiv.offsetWidth + 'px';
 		document.getElementById('Drive' + i + 'UsePerc').innerHTML = HddData['Drive' + i].UsePercent + ' %';
 		document.getElementById('Drive' + i + 'UsePercWidth').style.width = CalcWidthBar(HddData['Drive' + i].UsePercent);
 		document.getElementById('Drive' + i + 'ActivePercent').innerHTML = HddData['Drive' + i].ActivePercent + ' %';
