@@ -48,7 +48,6 @@
     <Compile Include="DataClasses\Core.cs" />
     <Compile Include="DataClasses\Drive.cs" />
     <Compile Include="DataClasses\NetworkInterface.cs" />
-    <Compile Include="IWMI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

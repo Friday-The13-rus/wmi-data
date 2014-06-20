@@ -7,8 +7,8 @@ namespace WMI
 	[ComVisible(true),
 	 Guid("A79AC85C-547C-3ED3-AD94-530DC4BBB672"),
 	 ProgId("WMI.GetData"),
-	 ClassInterface(ClassInterfaceType.None)]
-	public class DataReturner : IWMI
+	 ClassInterface(ClassInterfaceType.AutoDual)]
+	public class DataReturner
 	{
 		DataManager data;
 
