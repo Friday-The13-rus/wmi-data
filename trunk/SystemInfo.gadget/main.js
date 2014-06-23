@@ -1,4 +1,4 @@
-﻿onerror = Error;
+ onerror = Error;
 execScript('Function Message(prompt, title)\r\n'
     + ' Message = MsgBox(prompt, 16, title)\r\n'
     + 'End Function', "vbscript");
@@ -208,7 +208,7 @@ function hdd()
 		
 		nameDiv.innerHTML = driveName;
 		spaceDiv.innerHTML = HddData['Drive' + i].FreeSpace;
-		nameDiv.style.width = 120 - 7 - spaceDiv.offsetWidth + 'px';
+		nameDiv.style.width = 120 - 12 - spaceDiv.offsetWidth + 'px';
 		document.getElementById('Drive' + i + 'UsePerc').innerHTML = HddData['Drive' + i].UsePercent + ' %';
 		document.getElementById('Drive' + i + 'UsePercWidth').style.width = CalcWidthBar(HddData['Drive' + i].UsePercent);
 		document.getElementById('Drive' + i + 'ActivePercent').innerHTML = HddData['Drive' + i].ActivePercent + ' %';
