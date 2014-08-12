@@ -1,4 +1,4 @@
-﻿using System;
+ using System;
 using System.Collections.Generic;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -78,7 +78,14 @@ namespace WMI
 
 		public Drive GetDriveData(int drive)
 		{
-			return drives.Values[drive];
+			try
+			{
+				return drives.Values[drive];
+			}
+			catch (IndexOutOfRangeException)
+			{
+				return new Drive(string.Empty, string.Empty, 0, 0, 0, 0);
+			}
 		}
 
 		public int GetDrivesCount()
