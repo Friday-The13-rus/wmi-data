@@ -29,8 +29,8 @@ function Start()
 
 function Error(message, source, lineno)
 {
-	line = 'File: ' + source + '; Line ' + lineno + '\r\n' +
-		'Message:\r\n' + message;
+	line = 'File: ' + source + '\r\nLine ' + lineno + '\r\n' +
+		'Message:' + message;
 	System.Diagnostics.EventLog.writeEntry(line, 1);
 	
 	Message(line, 'Error!');
@@ -126,13 +126,16 @@ function Update()
 	{
 		temp = NetLib.GetDriveData(i);
 
-		HddData['Drive' + i].Name = temp.name;
-		HddData['Drive' + i].FreeSpace = formatBytes(temp.freeSpace, 'b');
-		HddData['Drive' + i].Space = formatBytes(temp.space, 'b');
-		HddData['Drive' + i].UseSpace = formatBytes(temp.space - temp.freeSpace, 'b');
-		HddData['Drive' + i].VolumeName = temp.volumeName;
-		HddData['Drive' + i].UsePercent = temp.usePercent;
-		HddData['Drive' + i].ActivePercent = temp.activePercent;
+		if (temp != null)
+    {
+      HddData['Drive' + i].Name = temp.name;
+      HddData['Drive' + i].FreeSpace = formatBytes(temp.freeSpace, 'b');
+      HddData['Drive' + i].Space = formatBytes(temp.space, 'b');
+      HddData['Drive' + i].UseSpace = formatBytes(temp.space - temp.freeSpace, 'b');
+      HddData['Drive' + i].VolumeName = temp.volumeName;
+      HddData['Drive' + i].UsePercent = temp.usePercent;
+      HddData['Drive' + i].ActivePercent = temp.activePercent;
+    }
 	}
 
 	temp = NetLib.GetNetworkData();
