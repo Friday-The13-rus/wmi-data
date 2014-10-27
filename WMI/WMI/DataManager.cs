@@ -1,8 +1,8 @@
- using System;
+using System;
 using System.Collections.Generic;
 using System.Management;
 using System.Runtime.InteropServices;
-using System.Timers;
+using System.Threading;
 using WMI.DataClasses;
 
 namespace WMI
@@ -10,6 +10,8 @@ namespace WMI
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
 	public class DataManager : IDisposable
 	{
+		readonly ReaderWriterLockSlim driveLock = new ReaderWriterLockSlim();
+
 		private readonly SortedList<string, Core> cores = new SortedList<string, Core>(6);
 		private readonly SortedList<string, Drive> drives = new SortedList<string, Drive>(3);
 		private readonly NetworkInterface network = new NetworkInterface();
@@ -19,7 +21,7 @@ namespace WMI
 		private readonly ManagementObjectSearcher networkSearcher;
 		private readonly ManagementObjectSearcher processorSearcher;
 
-		private readonly Timer timer = new Timer();
+		private readonly System.Timers.Timer timer = new System.Timers.Timer();
 		private bool disposed;
 
 		public DataManager(int updateInterval)
@@ -46,9 +48,10 @@ namespace WMI
 				opt);
 
 			timer.Interval = updateInterval;
-			timer.Elapsed += (source, e) => UpdateDrivesInfo();
 			timer.Elapsed += (source, e) => UpdateProcessorInfo();
 			timer.Elapsed += (source, e) => UpdateNetworkInfo();
+			timer.Elapsed += (source, e) => UpdateDrivesInfo();
+			timer.Elapsed += (source, e) => UpdateDrivesPersentDiskTimeInfo();
 			timer.Start();
 		}
 
@@ -71,6 +74,7 @@ namespace WMI
 					drivesSearcher.Dispose();
 					drivesPerfSearcher.Dispose();
 					networkSearcher.Dispose();
+					driveLock.Dispose();
 				}
 				disposed = true;
 			}
@@ -78,19 +82,18 @@ namespace WMI
 
 		public Drive GetDriveData(int drive)
 		{
-			try
+			return WrapDrivesReadLock(() =>
 			{
 				return drives.Values[drive];
-			}
-			catch (IndexOutOfRangeException)
-			{
-				return new Drive(string.Empty, string.Empty, 0, 0, 0, 0);
-			}
+			});
 		}
 
 		public int GetDrivesCount()
 		{
-			return drives.Count;
+			return WrapDrivesReadLock(() =>
+			{
+				return drives.Count;
+			});
 		}
 
 		public Core GetProcessorData(int core)
@@ -138,13 +141,42 @@ namespace WMI
 			}
 		}
 
+		void WrapDrivesWriteLock(Action action)
+		{
+			driveLock.EnterWriteLock();
+			try
+			{
+				action();
+			}
+			finally
+			{
+				driveLock.ExitWriteLock();
+			}
+		}
+
+		T WrapDrivesReadLock<T>(Func<T> func)
+		{
+			driveLock.EnterReadLock();
+			try
+			{
+				return func();
+			}
+			finally
+			{
+				driveLock.ExitReadLock();
+			}
+		}
+
 		public void UpdateDrivesInfo()
 		{
 			ManagementObjectCollection searcherGet = drivesSearcher.Get();
 
 			if (drives.Count > searcherGet.Count)
 			{
-				drives.Clear();
+				WrapDrivesWriteLock(() =>
+				{
+					drives.Clear();
+				});
 			}
 
 			foreach (ManagementObject obj in searcherGet)
@@ -158,76 +190,38 @@ namespace WMI
 				Drive currentDrive;
 				if (!drives.TryGetValue(name, out currentDrive))
 				{
-					var drive = new Drive(name, volumeName, freeSpace, space, usePercent, 0);
-					drives.Add(name, drive);
+					WrapDrivesWriteLock(() =>
+					{
+						var drive = new Drive(name, volumeName, freeSpace, space, usePercent, 0);
+						drives.Add(name, drive);
+					});
 				}
 				else
 				{
-					currentDrive.freeSpace = freeSpace;
-					currentDrive.volumeName = volumeName;
-					currentDrive.usePercent = usePercent;
-
-					foreach (ManagementObject objPerf in drivesPerfSearcher.Get())
+					WrapDrivesWriteLock(() =>
 					{
-						if (currentDrive.name == objPerf["Name"].ToString())
-						{
-							currentDrive.activePercent = Convert.ToByte(objPerf["PercentDiskTime"]);
-							break;
-						}
-					}
+						currentDrive.freeSpace = freeSpace;
+						currentDrive.volumeName = volumeName;
+						currentDrive.usePercent = usePercent;
+					});
 				}
 			}
 		}
 
-		/*void GetDataFromEvent()
+		void UpdateDrivesPersentDiskTimeInfo()
 		{
-			EventQuery query = new EventQuery();
-			query.QueryString = "SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE " +
-				"TargetInstance isa 'Win32_PerfFormattedData_PerfOS_Processor' Or " +
-				"TargetInstance isa 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' Or " +
-				"TargetInstance isa 'Win32_PerfFormattedData_Tcpip_NetworkInterface'";
-
-			bool stop = false;
-
-			using (ManagementEventWatcher watcher = new ManagementEventWatcher(query))
+			foreach (ManagementObject obj in drivesPerfSearcher.Get())
 			{
-				Console.WriteLine("Begin");
-
-				do
+				Drive drive;
+				string driveName = obj["Name"].ToString();
+				if (drives.TryGetValue(driveName, out drive))
 				{
-					using (ManagementBaseObject e = watcher.WaitForNextEvent())
-					using (ManagementBaseObject obj = (ManagementBaseObject)e["TargetInstance"])
+					WrapDrivesWriteLock(() =>
 					{
-						string outLine;
-
-						switch ((string)obj["__Class"])
-						{
-							case "Win32_PerfFormattedData_PerfOS_Processor":
-								{
-									outLine = String.Format("Core: {0} Percent: {1}", obj["Name"], obj["PercentProcessorTime"]);
-									break;
-								}
-							case "Win32_PerfFormattedData_PerfDisk_LogicalDisk":
-								{
-									outLine = String.Format("Disk: {0} Percent: {1}", obj["Name"], obj["PercentDiskTime"]);
-									break;
-								}
-							case "Win32_PerfFormattedData_Tcpip_NetworkInterface":
-								{
-									outLine = String.Format("Received: {0} Sent: {1}", obj["BytesReceivedPerSec"], obj["BytesSentPerSec"]);
-									break;
-								}
-							default:
-								{
-									outLine = String.Empty;
-									break;
-								}
-						}
-					}
-				} while (!stop);
-
-				watcher.Stop();
+						drive.activePercent = Convert.ToByte(obj["PercentDiskTime"]);
+					});
+				}
 			}
-		}*/
+		}
 	}
 }
