@@ -2,24 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Test
 {
 	class Program
 	{
+		static Dictionary<string, Func<EventArrivedEventArgs, string>> tables = new Dictionary<string, Func<EventArrivedEventArgs, string>>()
+			{
+				{"Win32_PerfFormattedData_PerfOS_Processor", GetProcessorString},
+				{"Win32_PerfFormattedData_PerfDisk_LogicalDisk", GetDiskString},
+				{"Win32_PerfFormattedData_Tcpip_NetworkInterface", GetNetworkString}
+			};
+
 		static void Main(string[] args)
 		{
-			string QueryString = "SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE " +
-				"TargetInstance isa 'Win32_PerfFormattedData_PerfOS_Processor' Or " +
-				"TargetInstance isa 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' Or " +
-				"TargetInstance isa 'Win32_PerfFormattedData_Tcpip_NetworkInterface'";
-			using (ManagementEventWatcher watcher = new ManagementEventWatcher(QueryString))
+			string condition = GetConditionString(tables.Keys.ToArray());
+
+			var wqlEventQuery = new WqlEventQuery("__InstanceOperationEvent", new TimeSpan(0, 0, 1), condition);
+			using (ManagementEventWatcher watcher = new ManagementEventWatcher(wqlEventQuery))
 			{
 				watcher.EventArrived += watcher_EventArrived;
 				watcher.Stopped += watcher_Stopped;
+				watcher.Scope = new ManagementScope("root\\CIMV2");
 
 				Console.WriteLine("Watcher started");
 				watcher.Start();
@@ -29,6 +34,11 @@ namespace Test
 			}
 		}
 
+		private static string GetConditionString(string[] tables)
+		{
+			return tables.Select(el => string.Format("TargetInstance isa '{0}'", el)).Aggregate((a, b) => string.Format("{0} Or {1}", a, b));
+		}
+
 		static void watcher_Stopped(object sender, StoppedEventArgs e)
 		{
 			Console.WriteLine("Watcher stoped");
@@ -36,36 +46,31 @@ namespace Test
 
 		static void watcher_EventArrived(object sender, EventArrivedEventArgs e)
 		{
-			var obj = (ManagementBaseObject)e.NewEvent["TargetInstance"];
-
-			string outLine;
-
-			switch ((string)obj["__Class"])
-			{
-				case "Win32_PerfFormattedData_PerfOS_Processor":
-					{
-						outLine = String.Format("Core: {0} Percent: {1} ({2})", obj["Name"], obj["PercentProcessorTime"], e.NewEvent["__CLASS"]);
-						break;
-					}
-				case "Win32_PerfFormattedData_PerfDisk_LogicalDisk":
-					{
-						outLine = String.Format("Disk: {0} Percent: {1} ({2})", obj["Name"], obj["PercentDiskTime"], e.NewEvent["__CLASS"]);
-						break;
-					}
-				case "Win32_PerfFormattedData_Tcpip_NetworkInterface":
-					{
-						outLine = String.Format("Received: {0} Sent: {1} ({2})", obj["BytesReceivedPerSec"], obj["BytesSentPerSec"], e.NewEvent["__CLASS"]);
-						break;
-					}
-				default:
-					{
-						outLine = String.Empty;
-						break;
-					}
-			}
-
+			string outLine = tables[GetClass(e)](e);
 			Console.WriteLine(outLine);
+		}
 
+		static string GetClass(EventArrivedEventArgs e)
+		{
+			return (string)((ManagementBaseObject)e.NewEvent["TargetInstance"])["__Class"];
+		}
+
+		private static string GetProcessorString(EventArrivedEventArgs e)
+		{
+			var obj = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+			return String.Format("Core: {0} Percent: {1} ({2})", obj["Name"], obj["PercentProcessorTime"], e.NewEvent["__CLASS"]);
+		}
+
+		private static string GetDiskString(EventArrivedEventArgs e)
+		{
+			var obj = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+			return String.Format("Disk: {0} Percent: {1} ({2})", obj["Name"], obj["PercentDiskTime"], e.NewEvent["__CLASS"]);
+		}
+
+		private static string GetNetworkString(EventArrivedEventArgs e)
+		{
+			var obj = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+			return String.Format("Received: {0} Sent: {1} ({2})", obj["BytesReceivedPerSec"], obj["BytesSentPerSec"], e.NewEvent["__CLASS"]);
 		}
 	}
 }
