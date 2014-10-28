@@ -11,6 +11,7 @@ namespace WMI
 	public class DataManager : IDisposable
 	{
 		readonly ReaderWriterLockSlim driveLock = new ReaderWriterLockSlim();
+		readonly ReaderWriterLockSlim cpuLock = new ReaderWriterLockSlim();
 
 		private readonly SortedList<string, Core> cores = new SortedList<string, Core>(6);
 		private readonly SortedList<string, Drive> drives = new SortedList<string, Drive>(3);
@@ -82,7 +83,7 @@ namespace WMI
 
 		public Drive GetDriveData(int drive)
 		{
-			return WrapDrivesReadLock(() =>
+			return driveLock.ReadLock(() =>
 			{
 				return drives.Values[drive];
 			});
@@ -90,7 +91,7 @@ namespace WMI
 
 		public int GetDrivesCount()
 		{
-			return WrapDrivesReadLock(() =>
+			return driveLock.ReadLock(() =>
 			{
 				return drives.Count;
 			});
@@ -98,12 +99,18 @@ namespace WMI
 
 		public Core GetProcessorData(int core)
 		{
-			return cores.Values[core];
+			return cpuLock.ReadLock(() =>
+			{
+				return cores.Values[core];
+			});
 		}
 
 		public int GetCoresCount()
 		{
-			return cores.Count;
+			return cpuLock.ReadLock(() =>
+			{
+				return cores.Count;
+			});
 		}
 
 		public NetworkInterface GetNetworkData()
@@ -131,39 +138,19 @@ namespace WMI
 				Core currentCore;
 				if (!cores.TryGetValue(name, out currentCore))
 				{
-					var core = new Core(name, percent);
-					cores.Add(name, core);
+					cpuLock.WriteLock(() =>
+					{
+						var core = new Core(name, percent);
+						cores.Add(name, core);
+					});
 				}
 				else
 				{
-					currentCore.usePercent = percent;
+					cpuLock.WriteLock(() =>
+					{
+						currentCore.usePercent = percent;
+					});
 				}
-			}
-		}
-
-		void WrapDrivesWriteLock(Action action)
-		{
-			driveLock.EnterWriteLock();
-			try
-			{
-				action();
-			}
-			finally
-			{
-				driveLock.ExitWriteLock();
-			}
-		}
-
-		T WrapDrivesReadLock<T>(Func<T> func)
-		{
-			driveLock.EnterReadLock();
-			try
-			{
-				return func();
-			}
-			finally
-			{
-				driveLock.ExitReadLock();
 			}
 		}
 
@@ -173,7 +160,7 @@ namespace WMI
 
 			if (drives.Count > searcherGet.Count)
 			{
-				WrapDrivesWriteLock(() =>
+				driveLock.WriteLock(() =>
 				{
 					drives.Clear();
 				});
@@ -190,7 +177,7 @@ namespace WMI
 				Drive currentDrive;
 				if (!drives.TryGetValue(name, out currentDrive))
 				{
-					WrapDrivesWriteLock(() =>
+					driveLock.WriteLock(() =>
 					{
 						var drive = new Drive(name, volumeName, freeSpace, space, usePercent, 0);
 						drives.Add(name, drive);
@@ -198,7 +185,7 @@ namespace WMI
 				}
 				else
 				{
-					WrapDrivesWriteLock(() =>
+					driveLock.WriteLock(() =>
 					{
 						currentDrive.freeSpace = freeSpace;
 						currentDrive.volumeName = volumeName;
@@ -216,7 +203,7 @@ namespace WMI
 				string driveName = obj["Name"].ToString();
 				if (drives.TryGetValue(driveName, out drive))
 				{
-					WrapDrivesWriteLock(() =>
+					driveLock.WriteLock(() =>
 					{
 						drive.activePercent = Convert.ToByte(obj["PercentDiskTime"]);
 					});
