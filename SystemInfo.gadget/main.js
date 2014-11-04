@@ -1,25 +1,39 @@
+"use strict";
+
 onerror = Error;
 execScript('Function Message(prompt, title)\r\n'
 	+ ' Message = MsgBox(prompt, 16, title)\r\n'
 	+ 'End Function', "vbscript");
 
+if (!Array.prototype.forEach) {
+	Array.prototype.forEach = function (fun /*, thisp*/) {
+		var len = this.length;
+		if (typeof fun != "function")
+			throw new TypeError();
+
+		var thisp = arguments[1];
+		for (var i = 0; i < len; i++) {
+			if (i in this)
+				fun.call(thisp, this[i], i, this);
+		}
+	};
+}
+
 var rowHeight = 14;
 var widthBar = 80;
 
-var CpuData = {};
-var RamData = {};
-var HddData = {};
-var NetData = {};
+var dataElements = [];
+var NetLib = {};
 
 function CpuObj() {
-	this.cores = [];
-	this.allCores = 0;
+	var cores = [];
+	var allCores = 0;
 	this.CoresCount = function () {
-		return this.cores.length;
+		return cores.length;
 	}
 
 	for (var i = 0; i < System.Machine.CPUs.count; i++) {
-		this.cores[i] = 0;
+		cores[i] = 0;
 		cpuDiv.innerHTML +=
 			'<div id="Core' + i + '" style="top:' + (i * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
 			'<div style="top:' + (i * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
@@ -31,15 +45,15 @@ function CpuObj() {
 
 	this.Update = function () {
 		var j = 0;
-		for (var i = 0; i < NetLib.GetCoresCount(); i++) {
+		for (var i = 0; i < NetLib.GetCoresCount() ; i++) {
 			var temp = NetLib.GetProcessorData(i);
 
 			if (temp.name != "_Total") {
-				this.cores[j] = parseInt(temp.usePercent);
+				cores[j] = parseInt(temp.usePercent);
 				j++;
 			}
 			else {
-				this.allCores = parseInt(temp.usePercent);
+				allCores = parseInt(temp.usePercent);
 			}
 		}
 	}
@@ -48,26 +62,26 @@ function CpuObj() {
 		var tempAllCores = 0;
 		for (var i = 0; i < System.Machine.CPUs.count; i++) {
 			var tempPercent = Math.min(Math.max(System.Machine.CPUs.item(i).usagePercentage, 0), 100);
-			this.cores[i] = parseInt(tempPercent);
+			cores[i] = parseInt(tempPercent);
 			tempAllCores += parseInt(tempPercent);
 		}
-		this.allCores = Math.round(tempAllCores / this.CoresCount());
+		allCores = Math.round(tempAllCores / this.CoresCount());
 	}
 
 	this.Draw = function () {
-		document.getElementById('totalPercent').innerHTML = this.allCores + ' %';
-		for (i = 0; i < this.CoresCount() ; i++) {
-			document.getElementById('Core' + i).innerHTML = this.cores[i] + ' %';
-			document.getElementById('Core' + i + 'Width').style.width = CalcWidthBar(this.cores[i]);
+		document.getElementById('totalPercent').innerHTML = allCores + ' %';
+		for (var i = 0; i < this.CoresCount() ; i++) {
+			document.getElementById('Core' + i).innerHTML = cores[i] + ' %';
+			document.getElementById('Core' + i + 'Width').style.width = CalcWidthBar(cores[i]);
 		}
 	}
 }
 
 function RamObj() {
-	this.free = 0;
-	this.total = System.Machine.totalMemory;
-	this.use = 0;
-	this.percentUse = 0;
+	var free = 0;
+	var total = System.Machine.totalMemory;
+	var use = 0;
+	var percentUse = 0;
 
 	useRam.innerHTML = '0 Мб';
 	ramDiv.innerHTML =
@@ -78,27 +92,27 @@ function RamObj() {
 		'</div>';
 
 	this.Update = function () {
-		this.free = System.Machine.availableMemory;
-		this.use = this.total - this.free;
-		this.percentUse = (100 * this.use / this.total).toFixed();
+		free = System.Machine.availableMemory;
+		use = total - free;
+		percentUse = (100 * use / total).toFixed();
 	}
 
 	this.Draw = function () {
-		var useRamTemp = formatBytes(this.use, 'mb');
+		var useRamTemp = formatBytes(use, 'mb');
 		document.getElementById('useRam').innerHTML = useRamTemp;
-		document.getElementById('percentUseRam').innerHTML = this.percentUse + ' %';
-		document.getElementById('percentUseRamWidth').style.width = CalcWidthBar(this.percentUse);
+		document.getElementById('percentUseRam').innerHTML = percentUse + ' %';
+		document.getElementById('percentUseRamWidth').style.width = CalcWidthBar(percentUse);
 		ramSect.title =
-			'Всего памяти: ' + formatBytes(this.total, 'mb') + '\r\n' +
+			'Всего памяти: ' + formatBytes(total, 'mb') + '\r\n' +
 			'Занято памяти: ' + useRamTemp + '\r\n' +
-			'Свободно памяти: ' + formatBytes(this.free, 'mb')
+			'Свободно памяти: ' + formatBytes(free, 'mb')
 	}
 }
 
 function DriveObj() {
-	this.drives = [];
+	var drives = [];
 	this.DrivesCount = function () {
-		return this.drives.length;
+		return drives.length;
 	}
 
 	var Drive = function () {
@@ -130,6 +144,14 @@ function DriveObj() {
 			'</div>';
 	}
 
+	var WipeDrive = function (i) {
+		var element = document.getElementById("Drive" + i);
+		var delimiter = element.previousSibling;
+		var parent = element.parentNode;
+		parent.removeChild(element);
+		parent.removeChild(delimiter);
+	}
+
 	var AvailDrivesCount = function () {
 		var validLetters = 0;
 		var letters = 'ABCDEFJGHGKLMNOPQRSTUVWXYZ';
@@ -147,24 +169,25 @@ function DriveObj() {
 	}
 
 	for (i = 0; i < AvailDrivesCount() ; i++) {
-		this.drives[i] = new Drive();
+		drives[i] = new Drive();
 		PaintDrive(i);
+	}
+
+	var OpenDrive = function () {
+		System.Shell.execute(this.outerText.slice(0, 2));
 	}
 
 	this.Update = function () {
 		var drivesCount = NetLib.GetDrivesCount();
 		if (this.DrivesCount() > drivesCount) {
-			hddDiv.innerHTML = '';
-			this.drives = [];
-
-			for (var i = 0; i < this.DrivesCount() ; i++) {
-				this.drives[i] = new Drive();
-				PaintDrive(i);
+			for (var i = this.DrivesCount() - 1; i >= drivesCount; i--) {
+				drives.pop();
+				WipeDrive(i);
 			}
 		}
 		else if (this.DrivesCount() < drivesCount) {
 			for (var i = this.DrivesCount() ; i < drivesCount; i++) {
-				this.drives[i] = new Drive();
+				drives[i] = new Drive();
 				PaintDrive(i);
 			}
 		}
@@ -172,43 +195,43 @@ function DriveObj() {
 		for (var i = 0; i < this.DrivesCount() ; i++) {
 			var temp = NetLib.GetDriveData(i);
 
-			this.drives[i].Name = temp.name;
-			this.drives[i].FreeSpace = formatBytes(temp.freeSpace, 'b');
-			this.drives[i].Space = formatBytes(temp.space, 'b');
-			this.drives[i].UseSpace = formatBytes(temp.space - temp.freeSpace, 'b');
-			this.drives[i].VolumeName = temp.volumeName;
-			this.drives[i].UsePercent = temp.usePercent;
-			this.drives[i].ActivePercent = temp.activePercent;
+			drives[i].Name = temp.name;
+			drives[i].FreeSpace = formatBytes(temp.freeSpace, 'b');
+			drives[i].Space = formatBytes(temp.space, 'b');
+			drives[i].UseSpace = formatBytes(temp.space - temp.freeSpace, 'b');
+			drives[i].VolumeName = temp.volumeName;
+			drives[i].UsePercent = temp.usePercent;
+			drives[i].ActivePercent = temp.activePercent;
 		}
 	}
 
 	this.Draw = function () {
 		for (i = 0; i < this.DrivesCount() ; i++) {
 			var drive = document.getElementById('Drive' + i);
-			var driveName = this.drives[i].Name + ' ' + this.drives[i].VolumeName;
+			var driveName = drives[i].Name + ' ' + drives[i].VolumeName;
 			drive.onclick = OpenDrive;
 			drive.title = driveName + '\r\n' +
-				'Всего места: ' + this.drives[i].Space + '\r\n' +
-				'Занято места: ' + this.drives[i].UseSpace + '\r\n' +
-				'Свободно места: ' + this.drives[i].FreeSpace;
+				'Всего места: ' + drives[i].Space + '\r\n' +
+				'Занято места: ' + drives[i].UseSpace + '\r\n' +
+				'Свободно места: ' + drives[i].FreeSpace;
 
 			var nameDiv = document.getElementById('Drive' + i + 'Name');
 			var spaceDiv = document.getElementById('Drive' + i + 'FreeSpace');
 
 			nameDiv.innerHTML = driveName;
-			spaceDiv.innerHTML = this.drives[i].FreeSpace;
+			spaceDiv.innerHTML = drives[i].FreeSpace;
 			nameDiv.style.width = 120 - 12 - spaceDiv.offsetWidth + 'px';
-			document.getElementById('Drive' + i + 'UsePerc').innerHTML = this.drives[i].UsePercent + ' %';
-			document.getElementById('Drive' + i + 'UsePercWidth').style.width = CalcWidthBar(this.drives[i].UsePercent);
-			document.getElementById('Drive' + i + 'ActivePercent').innerHTML = this.drives[i].ActivePercent + ' %';
-			document.getElementById('Drive' + i + 'ActivePercentWidth').style.width = CalcWidthBar(this.drives[i].ActivePercent);
+			document.getElementById('Drive' + i + 'UsePerc').innerHTML = drives[i].UsePercent + ' %';
+			document.getElementById('Drive' + i + 'UsePercWidth').style.width = CalcWidthBar(drives[i].UsePercent);
+			document.getElementById('Drive' + i + 'ActivePercent').innerHTML = drives[i].ActivePercent + ' %';
+			document.getElementById('Drive' + i + 'ActivePercentWidth').style.width = CalcWidthBar(drives[i].ActivePercent);
 		}
 	}
 }
 
 function NetObj() {
-	this.received = '0 байт';
-	this.sent = '0 байт';
+	var received = '0 байт';
+	var sent = '0 байт';
 
 	networkDiv.innerHTML =
 		'<div style="top:' + (0 * rowHeight) + 'px; left:3px;">' +
@@ -222,28 +245,30 @@ function NetObj() {
 
 	this.Update = function () {
 		var temp = NetLib.GetNetworkData();
-		this.received = formatBytes(temp.received, 'b');
-		this.sent = formatBytes(temp.sent, 'b');
+		received = formatBytes(temp.received, 'b');
+		sent = formatBytes(temp.sent, 'b');
 	}
 
 	this.Draw = function () {
-		document.getElementById('NetReceived').innerHTML = this.received;
-		document.getElementById('NetSent').innerHTML = this.sent;
+		document.getElementById('NetReceived').innerHTML = received;
+		document.getElementById('NetSent').innerHTML = sent;
 	}
 }
 
 function Start() {
 	//debugger;
-	CpuData = new CpuObj();
-	RamData = new RamObj();
-	NetData = new NetObj();
-	HddData = new DriveObj();
+	dataElements.push(
+		new CpuObj(),
+		new RamObj(),
+		new DriveObj(),
+		new NetObj()
+	);
 	CalculateHeight();
 
 	NetLib = GetLibrary();
 	NetLib.Start();
 
-	setTimeout(function () { setInterval(Update, 1000) }, 5000);
+	setInterval(Update, 1000);
 }
 
 function Error(message, source, lineno) {
@@ -260,19 +285,9 @@ function Stop() {
 }
 
 function Update() {
-	CpuData.Update();
-	RamData.Update();
-	HddData.Update();
-	NetData.Update();
+	dataElements.forEach(function (item) { item.Update(); });
+	dataElements.forEach(function (item) { item.Draw(); });
 
-	DisplayData();
-}
-
-function DisplayData() {
-	CpuData.Draw();
-	RamData.Draw();
-	HddData.Draw();
-	NetData.Draw();
 	CalculateHeight();
 }
 
@@ -295,19 +310,22 @@ function formatBytes(bytes, size) {
 }
 
 function CalculateHeight() {
-	cpuSect.style.height = 18 + CpuData.CoresCount() * rowHeight;
+	var coresCount = dataElements[0].CoresCount();
+	var drivesCount = dataElements[2].DrivesCount();
+
+	cpuSect.style.height = 18 + coresCount * rowHeight;
 	ramSect.style.height = 18 + 1 * rowHeight;
-	hddSect.style.height = 3 + HddData.DrivesCount() * rowHeight * 3 + 3 * (HddData.DrivesCount() - 1);
+	hddSect.style.height = 3 * drivesCount * (rowHeight + 1);
 	networkSect.style.height = 18 + 1 * rowHeight;
-	document.body.style.height = parseInt(cpuSect.style.height) + parseInt(ramSect.style.height) + parseInt(hddSect.style.height) + parseInt(networkSect.style.height) + 3;
+	document.body.style.height =
+		parseInt(cpuSect.style.height) +
+		parseInt(ramSect.style.height) +
+		parseInt(hddSect.style.height) +
+		parseInt(networkSect.style.height) + 3;
 	bottom.style.top = parseInt(document.body.style.height) - 10;
 	middle.style.height = parseInt(document.body.style.height) - 20;
 }
 
 function CalcWidthBar(percent) {
 	return Math.round(percent * widthBar / 100);
-}
-
-function OpenDrive() {
-	System.Shell.execute(this.outerText.slice(0, 2));
 }
