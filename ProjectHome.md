@@ -1,0 +1,1 @@
+Gets information about processor, hard drives and network connections from WMI
