@@ -6,19 +6,19 @@ namespace WMI.DataClasses
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
 	public class NetworkInterface
 	{
-		public uint received;
-		public uint sent;
+		public uint Received { get; set; }
+		public uint Sent { get; set; }
 
 		public NetworkInterface(uint received, uint sent)
 		{
-			this.received = received;
-			this.sent = sent;
+			Received = received;
+			Sent = sent;
 		}
 
 		public NetworkInterface()
 		{
-			received = 0;
-			sent = 0;
+			Received = 0;
+			Sent = 0;
 		}
 	}
 }

@@ -122,8 +122,8 @@ namespace WMI
 		{
 			foreach (ManagementObject obj in networkSearcher.Get())
 			{
-				network.received = Convert.ToUInt32(obj["BytesReceivedPerSec"]);
-				network.sent = Convert.ToUInt32(obj["BytesSentPerSec"]);
+				network.Received = Convert.ToUInt32(obj["BytesReceivedPerSec"]);
+				network.Sent = Convert.ToUInt32(obj["BytesSentPerSec"]);
 				break;
 			}
 		}
@@ -148,7 +148,7 @@ namespace WMI
 				{
 					cpuLock.WriteLock(() =>
 					{
-						currentCore.usePercent = percent;
+						currentCore.UsePercent = percent;
 					});
 				}
 			}
@@ -187,9 +187,9 @@ namespace WMI
 				{
 					driveLock.WriteLock(() =>
 					{
-						currentDrive.freeSpace = freeSpace;
-						currentDrive.volumeName = volumeName;
-						currentDrive.usePercent = usePercent;
+						currentDrive.FreeSpace = freeSpace;
+						currentDrive.VolumeName = volumeName;
+						currentDrive.UsePercent = usePercent;
 					});
 				}
 			}
@@ -205,7 +205,7 @@ namespace WMI
 				{
 					driveLock.WriteLock(() =>
 					{
-						drive.activePercent = Convert.ToByte(obj["PercentDiskTime"]);
+						drive.ActivePercent = Convert.ToByte(obj["PercentDiskTime"]);
 					});
 				}
 			}
