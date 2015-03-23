@@ -63,7 +63,7 @@ function CpuObj() {
 		for (var i = 0; i < System.Machine.CPUs.count; i++) {
 			var tempPercent = Math.min(Math.max(System.Machine.CPUs.item(i).usagePercentage, 0), 100);
 			cores[i] = parseInt(tempPercent);
-			tempAllCores += parseInt(tempPercent);
+			tempAllCores += cores[i];
 		}
 		allCores = Math.round(tempAllCores / this.CoresCount());
 	}
@@ -83,7 +83,7 @@ function RamObj() {
 	var use = 0;
 	var percentUse = 0;
 
-	useRam.innerHTML = '0 Мб';
+	freeRam.innerHTML = '0 Мб';
 	ramDiv.innerHTML =
 		'<div id="percentUseRam" style="top:' + (0 * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
 		'<div style="top:' + (0 * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
@@ -98,14 +98,14 @@ function RamObj() {
 	}
 
 	this.Draw = function () {
-		var useRamTemp = formatBytes(use, 'mb');
-		document.getElementById('useRam').innerHTML = useRamTemp;
-		document.getElementById('percentUseRam').innerHTML = percentUse + ' %';
-		document.getElementById('percentUseRamWidth').style.width = CalcWidthBar(percentUse);
+		var freeRamTemp = formatBytes(free, 'mb');
+		freeRam.innerHTML = freeRamTemp;
+		percentUseRam.innerHTML = percentUse + ' %';
+		percentUseRamWidth.style.width = CalcWidthBar(percentUse);
 		ramSect.title =
 			'Всего памяти: ' + formatBytes(total, 'mb') + '\r\n' +
-			'Занято памяти: ' + useRamTemp + '\r\n' +
-			'Свободно памяти: ' + formatBytes(free, 'mb')
+			'Занято памяти: ' + formatBytes(use, 'mb') + '\r\n' +
+			'Свободно памяти: ' + freeRamTemp
 	}
 }
 
@@ -250,8 +250,8 @@ function NetObj() {
 	}
 
 	this.Draw = function () {
-		document.getElementById('NetReceived').innerHTML = received;
-		document.getElementById('NetSent').innerHTML = sent;
+		NetReceived.innerHTML = received;
+		NetSent.innerHTML = sent;
 	}
 }
 
