@@ -8,7 +8,7 @@ using WMI.DataClasses;
 namespace WMI
 {
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
-	public class DataManager : IDisposable
+	public class DataManager : IDataManager
 	{
 		readonly ReaderWriterLockSlim driveLock = new ReaderWriterLockSlim();
 		readonly ReaderWriterLockSlim cpuLock = new ReaderWriterLockSlim();
@@ -75,7 +75,9 @@ namespace WMI
 					drivesSearcher.Dispose();
 					drivesPerfSearcher.Dispose();
 					networkSearcher.Dispose();
+
 					driveLock.Dispose();
+					cpuLock.Dispose();
 				}
 				disposed = true;
 			}
@@ -83,34 +85,22 @@ namespace WMI
 
 		public Drive GetDriveData(int drive)
 		{
-			return driveLock.ReadLock(() =>
-			{
-				return drives.Values[drive];
-			});
+			return driveLock.ReadLock(() => drives.Values[drive]);
 		}
 
 		public int GetDrivesCount()
 		{
-			return driveLock.ReadLock(() =>
-			{
-				return drives.Count;
-			});
+			return driveLock.ReadLock(() => drives.Count);
 		}
 
 		public Core GetProcessorData(int core)
 		{
-			return cpuLock.ReadLock(() =>
-			{
-				return cores.Values[core];
-			});
+			return cpuLock.ReadLock(() => cores.Values[core]);
 		}
 
 		public int GetCoresCount()
 		{
-			return cpuLock.ReadLock(() =>
-			{
-				return cores.Count;
-			});
+			return cpuLock.ReadLock(() => cores.Count);
 		}
 
 		public NetworkInterface GetNetworkData()
@@ -120,35 +110,32 @@ namespace WMI
 
 		private void UpdateNetworkInfo()
 		{
-			foreach (ManagementObject obj in networkSearcher.Get())
+			foreach (ManagementBaseObject obj in networkSearcher.Get())
 			{
-				network.Received = Convert.ToUInt32(obj["BytesReceivedPerSec"]);
-				network.Sent = Convert.ToUInt32(obj["BytesSentPerSec"]);
+				network.Update(obj);
 				break;
 			}
 		}
 
 		private void UpdateProcessorInfo()
 		{
-			foreach (ManagementObject obj in processorSearcher.Get())
+			foreach (ManagementBaseObject obj in processorSearcher.Get())
 			{
-				string name = obj["Name"].ToString();
-				byte percent = Convert.ToByte(obj["PercentProcessorTime"]);
+				string name = obj.GetName();
 
 				Core currentCore;
 				if (!cores.TryGetValue(name, out currentCore))
 				{
 					cpuLock.WriteLock(() =>
 					{
-						var core = new Core(name, percent);
-						cores.Add(name, core);
+						cores.Add(name, new Core(obj));
 					});
 				}
 				else
 				{
 					cpuLock.WriteLock(() =>
 					{
-						currentCore.UsePercent = percent;
+						currentCore.Update(obj);
 					});
 				}
 			}
@@ -156,56 +143,47 @@ namespace WMI
 
 		public void UpdateDrivesInfo()
 		{
-			ManagementObjectCollection searcherGet = drivesSearcher.Get();
-
-			if (drives.Count > searcherGet.Count)
+			using (ManagementObjectCollection searcherGet = drivesSearcher.Get())
 			{
-				driveLock.WriteLock(() =>
+				if (drives.Count > searcherGet.Count)
 				{
-					drives.Clear();
-				});
-			}
-
-			foreach (ManagementObject obj in searcherGet)
-			{
-				string name = obj["Name"].ToString();
-				ulong freeSpace = Convert.ToUInt64(obj["FreeSpace"]);
-				ulong space = Convert.ToUInt64(obj["Size"]);
-				string volumeName = obj["VolumeName"].ToString();
-				byte usePercent = Convert.ToByte(100 * (1 - (double)freeSpace / space));
-
-				Drive currentDrive;
-				if (!drives.TryGetValue(name, out currentDrive))
-				{
-					driveLock.WriteLock(() =>
-					{
-						var drive = new Drive(name, volumeName, freeSpace, space, usePercent, 0);
-						drives.Add(name, drive);
-					});
+					driveLock.WriteLock(() => drives.Clear());
 				}
-				else
+
+				foreach (ManagementBaseObject obj in searcherGet)
 				{
-					driveLock.WriteLock(() =>
+					string name = obj.GetName();
+
+					Drive currentDrive;
+					if (!drives.TryGetValue(name, out currentDrive))
 					{
-						currentDrive.FreeSpace = freeSpace;
-						currentDrive.VolumeName = volumeName;
-						currentDrive.UsePercent = usePercent;
-					});
+						driveLock.WriteLock(() =>
+						{
+							drives.Add(name, new Drive(obj));
+						});
+					}
+					else
+					{
+						driveLock.WriteLock(() =>
+						{
+							currentDrive.Update(obj);
+						});
+					}
 				}
 			}
 		}
 
 		void UpdateDrivesPersentDiskTimeInfo()
 		{
-			foreach (ManagementObject obj in drivesPerfSearcher.Get())
+			foreach (ManagementBaseObject obj in drivesPerfSearcher.Get())
 			{
 				Drive drive;
-				string driveName = obj["Name"].ToString();
+				string driveName = obj.GetName();
 				if (drives.TryGetValue(driveName, out drive))
 				{
 					driveLock.WriteLock(() =>
 					{
-						drive.ActivePercent = Convert.ToByte(obj["PercentDiskTime"]);
+						drive.Update(obj);
 					});
 				}
 			}
