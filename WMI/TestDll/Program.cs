@@ -14,7 +14,8 @@ namespace TestDll
 		{
 			DataReturner dr = new DataReturner();
 			dr.Start();
-			Thread.Sleep(10000);
+
+			Console.ReadLine();
 			dr.Stop();
 		}
 	}

@@ -110,16 +110,17 @@ namespace WMI
 
 		private void UpdateNetworkInfo()
 		{
-			foreach (ManagementBaseObject obj in networkSearcher.Get())
+			foreach (ManagementObject obj in networkSearcher.Get())
 			{
 				network.Update(obj);
+				obj.Dispose();
 				break;
 			}
 		}
 
 		private void UpdateProcessorInfo()
 		{
-			foreach (ManagementBaseObject obj in processorSearcher.Get())
+			foreach (ManagementObject obj in processorSearcher.Get())
 			{
 				string name = obj.GetName();
 
@@ -138,6 +139,7 @@ namespace WMI
 						currentCore.Update(obj);
 					});
 				}
+				obj.Dispose();
 			}
 		}
 
@@ -150,7 +152,7 @@ namespace WMI
 					driveLock.WriteLock(() => drives.Clear());
 				}
 
-				foreach (ManagementBaseObject obj in searcherGet)
+				foreach (ManagementObject obj in searcherGet)
 				{
 					string name = obj.GetName();
 
@@ -169,13 +171,14 @@ namespace WMI
 							currentDrive.Update(obj);
 						});
 					}
+					obj.Dispose();
 				}
 			}
 		}
 
 		void UpdateDrivesPersentDiskTimeInfo()
 		{
-			foreach (ManagementBaseObject obj in drivesPerfSearcher.Get())
+			foreach (ManagementObject obj in drivesPerfSearcher.Get())
 			{
 				Drive drive;
 				string driveName = obj.GetName();
@@ -186,6 +189,7 @@ namespace WMI
 						drive.Update(obj);
 					});
 				}
+				obj.Dispose();
 			}
 		}
 	}

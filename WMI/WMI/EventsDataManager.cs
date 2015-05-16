@@ -9,6 +9,7 @@ using WMI.ManagementObjects;
 
 namespace WMI
 {
+	[Obsolete("Biggest memory leak, don't used", true)]
 	class EventsDataManager : IDataManager
 	{
 		private bool _disposed;
@@ -42,50 +43,73 @@ namespace WMI
 				foreach (ManagementBaseObject obj in searcherGet)
 				{
 					_drives.Add(new Drive(obj));
+					obj.Dispose();
 				}
 			}
 		}
 
 		private void NetworkManagementEventListenerOnDataUpdated(object sender, EventArrivedEventArgs dataUpdatedEventArgs)
 		{
-			_network.Update(dataUpdatedEventArgs.NewEvent.GetTargetInstance());
+			var newObject = dataUpdatedEventArgs.NewEvent.GetTargetInstance();
+			try
+			{
+				_network.Update(newObject);
+			}
+			finally
+			{
+				newObject.Dispose();
+			}
 		}
 
 		private void DriveManagementEventListenerOnDataUpdated(object sender, EventArrivedEventArgs dataUpdatedEventArgs)
 		{
 			var newObject = dataUpdatedEventArgs.NewEvent.GetTargetInstance();
-			var objectName = newObject.GetName();
-			if (objectName == "_Total")
-				return;
+			try
+			{
+				var objectName = newObject.GetName();
+				if (objectName == "_Total")
+					return;
 
-			var drive = _drives.Find(el => string.Equals(el.Name, objectName));
-			if (drive == null)
-			{
-				_drives.Add(new Drive(newObject));
-				_drives.Sort();
-			}
-			else
-			{
-				if (dataUpdatedEventArgs.NewEvent.IsInstanceDeletionEvent())
-					_drives.Remove(drive);
+				var drive = _drives.Find(el => string.Equals(el.Name, objectName));
+				if (drive == null)
+				{
+					_drives.Add(new Drive(newObject));
+					_drives.Sort();
+				}
 				else
-					drive.Update(newObject);
+				{
+					if (dataUpdatedEventArgs.NewEvent.IsInstanceDeletionEvent())
+						_drives.Remove(drive);
+					else
+						drive.Update(newObject);
+				}
+			}
+			finally
+			{
+				newObject.Dispose();
 			}
 		}
 
 		private void CpuManagementEventListenerOnDataUpdated(object sender, EventArrivedEventArgs dataUpdatedEventArgs)
 		{
 			var newObject = dataUpdatedEventArgs.NewEvent.GetTargetInstance();
-			var objectName = newObject.GetName();
-			var core = _cores.Find(el => string.Equals(el.Name, objectName));
-			if (core == null)
+			try
 			{
-				_cores.Add(new Core(newObject));
-				_cores.Sort();
+				var objectName = newObject.GetName();
+				var core = _cores.Find(el => string.Equals(el.Name, objectName));
+				if (core == null)
+				{
+					_cores.Add(new Core(newObject));
+					_cores.Sort();
+				}
+				else
+				{
+					core.Update(newObject);
+				}
 			}
-			else
+			finally
 			{
-				core.Update(newObject);
+				newObject.Dispose();
 			}
 		}
 

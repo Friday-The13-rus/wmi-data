@@ -15,7 +15,6 @@ namespace WMI
 		public void Start()
 		{
 			_data = new DataManager(1000);
-			//_data = new EventsDataManager();
 		}
 
 		public void Stop()
