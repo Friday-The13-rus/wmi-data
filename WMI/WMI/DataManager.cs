@@ -10,20 +10,20 @@ namespace WMI
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
 	public class DataManager : IDataManager
 	{
-		readonly ReaderWriterLockSlim driveLock = new ReaderWriterLockSlim();
-		readonly ReaderWriterLockSlim cpuLock = new ReaderWriterLockSlim();
+		readonly ReaderWriterLockSlim _driveLock = new ReaderWriterLockSlim();
+		readonly ReaderWriterLockSlim _cpuLock = new ReaderWriterLockSlim();
 
-		private readonly SortedList<string, Core> cores = new SortedList<string, Core>(6);
-		private readonly SortedList<string, Drive> drives = new SortedList<string, Drive>(3);
-		private readonly NetworkInterface network = new NetworkInterface();
+		private readonly SortedList<string, Core> _cores = new SortedList<string, Core>(6);
+		private readonly SortedList<string, Drive> _drives = new SortedList<string, Drive>(3);
+		private readonly NetworkInterface _network = new NetworkInterface();
 
-		private readonly ManagementObjectSearcher drivesPerfSearcher;
-		private readonly ManagementObjectSearcher drivesSearcher;
-		private readonly ManagementObjectSearcher networkSearcher;
-		private readonly ManagementObjectSearcher processorSearcher;
+		private readonly ManagementObjectSearcher _drivesPerfSearcher;
+		private readonly ManagementObjectSearcher _drivesSearcher;
+		private readonly ManagementObjectSearcher _networkSearcher;
+		private readonly ManagementObjectSearcher _processorSearcher;
 
-		private readonly System.Timers.Timer timer = new System.Timers.Timer();
-		private bool disposed;
+		private readonly System.Timers.Timer _timer = new System.Timers.Timer();
+		private bool _disposed;
 
 		public DataManager(int updateInterval)
 		{
@@ -38,22 +38,22 @@ namespace WMI
 				Rewindable = false
 			};
 
-			processorSearcher = new ManagementObjectSearcher(scope,
+			_processorSearcher = new ManagementObjectSearcher(scope,
 				new SelectQuery("SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor"), opt);
-			drivesSearcher = new ManagementObjectSearcher(scope,
+			_drivesSearcher = new ManagementObjectSearcher(scope,
 				new SelectQuery("SELECT Name, FreeSpace, VolumeName, Size FROM Win32_LogicalDisk WHERE Access != null"));
-			drivesPerfSearcher = new ManagementObjectSearcher(scope,
+			_drivesPerfSearcher = new ManagementObjectSearcher(scope,
 				new SelectQuery("SELECT Name, PercentDiskTime FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk"), opt);
-			networkSearcher = new ManagementObjectSearcher(scope,
+			_networkSearcher = new ManagementObjectSearcher(scope,
 				new SelectQuery("SELECT BytesReceivedPerSec, BytesSentPerSec FROM Win32_PerfFormattedData_Tcpip_NetworkInterface"),
 				opt);
 
-			timer.Interval = updateInterval;
-			timer.Elapsed += (source, e) => UpdateProcessorInfo();
-			timer.Elapsed += (source, e) => UpdateNetworkInfo();
-			timer.Elapsed += (source, e) => UpdateDrivesInfo();
-			timer.Elapsed += (source, e) => UpdateDrivesPersentDiskTimeInfo();
-			timer.Start();
+			_timer.Interval = updateInterval;
+			_timer.Elapsed += (source, e) => UpdateProcessorInfo();
+			_timer.Elapsed += (source, e) => UpdateNetworkInfo();
+			_timer.Elapsed += (source, e) => UpdateDrivesInfo();
+			_timer.Elapsed += (source, e) => UpdateDrivesPersentDiskTimeInfo();
+			_timer.Start();
 		}
 
 		public void Dispose()
@@ -64,55 +64,55 @@ namespace WMI
 
 		private void Dispose(bool disposing)
 		{
-			if (!disposed)
+			if (!_disposed)
 			{
 				if (disposing)
 				{
-					timer.Stop();
-					timer.Dispose();
+					_timer.Stop();
+					_timer.Dispose();
 
-					processorSearcher.Dispose();
-					drivesSearcher.Dispose();
-					drivesPerfSearcher.Dispose();
-					networkSearcher.Dispose();
+					_processorSearcher.Dispose();
+					_drivesSearcher.Dispose();
+					_drivesPerfSearcher.Dispose();
+					_networkSearcher.Dispose();
 
-					driveLock.Dispose();
-					cpuLock.Dispose();
+					_driveLock.Dispose();
+					_cpuLock.Dispose();
 				}
-				disposed = true;
+				_disposed = true;
 			}
 		}
 
 		public Drive GetDriveData(int drive)
 		{
-			return driveLock.ReadLock(() => drives.Values[drive]);
+			return _driveLock.ReadLock(() => _drives.Values[drive]);
 		}
 
 		public int GetDrivesCount()
 		{
-			return driveLock.ReadLock(() => drives.Count);
+			return _driveLock.ReadLock(() => _drives.Count);
 		}
 
 		public Core GetProcessorData(int core)
 		{
-			return cpuLock.ReadLock(() => cores.Values[core]);
+			return _cpuLock.ReadLock(() => _cores.Values[core]);
 		}
 
 		public int GetCoresCount()
 		{
-			return cpuLock.ReadLock(() => cores.Count);
+			return _cpuLock.ReadLock(() => _cores.Count);
 		}
 
 		public NetworkInterface GetNetworkData()
 		{
-			return network;
+			return _network;
 		}
 
 		private void UpdateNetworkInfo()
 		{
-			foreach (ManagementObject obj in networkSearcher.Get())
+			foreach (ManagementObject obj in _networkSearcher.Get())
 			{
-				network.Update(obj);
+				_network.Update(obj);
 				obj.Dispose();
 				break;
 			}
@@ -120,36 +120,35 @@ namespace WMI
 
 		private void UpdateProcessorInfo()
 		{
-			foreach (ManagementObject obj in processorSearcher.Get())
+			foreach (ManagementObject obj in _processorSearcher.Get())
 			{
 				string name = obj.GetName();
 
 				Core currentCore;
-				if (!cores.TryGetValue(name, out currentCore))
+				if (!_cores.TryGetValue(name, out currentCore))
 				{
-					cpuLock.WriteLock(() =>
+					_cpuLock.WriteLock(() =>
 					{
-						cores.Add(name, new Core(obj));
+						_cores.Add(name, new Core(obj));
 					});
 				}
 				else
 				{
-					cpuLock.WriteLock(() =>
+					_cpuLock.WriteLock(() =>
 					{
 						currentCore.Update(obj);
 					});
 				}
-				obj.Dispose();
 			}
 		}
 
 		public void UpdateDrivesInfo()
 		{
-			using (ManagementObjectCollection searcherGet = drivesSearcher.Get())
+			using (ManagementObjectCollection searcherGet = _drivesSearcher.Get())
 			{
-				if (drives.Count > searcherGet.Count)
+				if (_drives.Count > searcherGet.Count)
 				{
-					driveLock.WriteLock(() => drives.Clear());
+					_driveLock.WriteLock(() => _drives.Clear());
 				}
 
 				foreach (ManagementObject obj in searcherGet)
@@ -157,39 +156,37 @@ namespace WMI
 					string name = obj.GetName();
 
 					Drive currentDrive;
-					if (!drives.TryGetValue(name, out currentDrive))
+					if (!_drives.TryGetValue(name, out currentDrive))
 					{
-						driveLock.WriteLock(() =>
+						_driveLock.WriteLock(() =>
 						{
-							drives.Add(name, new Drive(obj));
+							_drives.Add(name, new Drive(obj));
 						});
 					}
 					else
 					{
-						driveLock.WriteLock(() =>
+						_driveLock.WriteLock(() =>
 						{
 							currentDrive.Update(obj);
 						});
 					}
-					obj.Dispose();
 				}
 			}
 		}
 
 		void UpdateDrivesPersentDiskTimeInfo()
 		{
-			foreach (ManagementObject obj in drivesPerfSearcher.Get())
+			foreach (ManagementObject obj in _drivesPerfSearcher.Get())
 			{
 				Drive drive;
 				string driveName = obj.GetName();
-				if (drives.TryGetValue(driveName, out drive))
+				if (_drives.TryGetValue(driveName, out drive))
 				{
-					driveLock.WriteLock(() =>
+					_driveLock.WriteLock(() =>
 					{
 						drive.Update(obj);
 					});
 				}
-				obj.Dispose();
 			}
 		}
 	}
