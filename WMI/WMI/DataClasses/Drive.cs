@@ -36,6 +36,10 @@ namespace WMI.DataClasses
 			ActivePercent = activePercent;
 		}
 
+		public Drive()
+		{
+		}
+
 		public int CompareTo(Drive other)
 		{
 			return string.CompareOrdinal(Name, other.Name);

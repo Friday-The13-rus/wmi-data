@@ -12,6 +12,6 @@ namespace WMI
 		int GetDrivesCount();
 		Core GetProcessorData(int i);
 		int GetCoresCount();
-		NetworkInterface GetNetworkData();
+		NetworkInterface GetNetworkData(string name);
 	}
 }

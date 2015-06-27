@@ -47,6 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataManager.cs" />
+    <Compile Include="DataProviders\CpuDataProvider.cs" />
+    <Compile Include="DataProviders\DataProvider.cs" />
+    <Compile Include="DataProviders\DrivesDataProvider.cs" />
+    <Compile Include="DataProviders\NetworkDataProvider.cs" />
     <Compile Include="DataReturner.cs" />
     <Compile Include="DataClasses\Core.cs" />
     <Compile Include="DataClasses\Drive.cs" />

@@ -42,9 +42,9 @@ namespace WMI
 			return _data.GetCoresCount();
 		}
 
-		public NetworkInterface GetNetworkData()
+		public NetworkInterface GetNetworkData(string name)
 		{
-			return _data.GetNetworkData();
+			return _data.GetNetworkData(name);
 		}
 	}
 }

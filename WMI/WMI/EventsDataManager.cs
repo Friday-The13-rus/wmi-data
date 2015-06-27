@@ -133,6 +133,11 @@ namespace WMI
 			return _cores.Count;
 		}
 
+		public NetworkInterface GetNetworkData(string name)
+		{
+			throw new NotImplementedException();
+		}
+
 		public NetworkInterface GetNetworkData()
 		{
 			return _network;

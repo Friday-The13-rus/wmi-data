@@ -22,6 +22,10 @@ namespace WMI.DataClasses
 			UsePercent = percent;
 		}
 
+		public Core()
+		{
+		}
+
 		public int CompareTo(Core other)
 		{
 			return string.CompareOrdinal(Name, other.Name);
