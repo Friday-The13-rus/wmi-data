@@ -2,7 +2,7 @@ var dllCLSID = "{A79AC85C-547C-3ED3-AD94-530DC4BBB672}";
 var Classname = "WMI.DataReturner";
 var LibPath = "file:///" + System.Gadget.path.replace(new RegExp("\\\\", "g"), "/") + "/WMI.dll"
 var LibName = "WMI";
-var Version = "1.0.0.2"
+var Version = "1.0.0.3"
 var oShell = new ActiveXObject("WScript.Shell");
 var token = "7cc237d377f44c1e";
 var runtimeVersion = "v4.0.30319";
@@ -58,7 +58,7 @@ function ActivateLibrary(root) {
 	}
 	catch (err) {
 		UnregisterLibrary();
-		return null;
+		throw err;
 	}
 }
 

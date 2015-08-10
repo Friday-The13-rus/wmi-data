@@ -244,7 +244,7 @@ function NetObj() {
 		'</div>';
 
 	this.Update = function () {
-		var temp = NetLib.GetNetworkData();
+		var temp = NetLib.GetNetworkData("Realtek PCIe GBE Family Controller");
 		received = formatBytes(temp.received, 'b');
 		sent = formatBytes(temp.sent, 'b');
 	}
