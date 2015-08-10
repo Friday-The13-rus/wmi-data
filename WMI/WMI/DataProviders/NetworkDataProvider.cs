@@ -9,7 +9,8 @@ namespace WMI.DataProviders
 {
 	class NetworkDataProvider : DataProvider<NetworkInterface>
 	{
-		public NetworkDataProvider()
+		public NetworkDataProvider(int updateInterval)
+			: base(updateInterval)
 		{
 			AddSearcher(new SelectQuery("SELECT Name, BytesReceivedPerSec, BytesSentPerSec FROM Win32_PerfFormattedData_Tcpip_NetworkInterface"), Update);
 		}

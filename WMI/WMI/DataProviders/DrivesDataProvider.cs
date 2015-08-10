@@ -9,7 +9,8 @@ namespace WMI.DataProviders
 {
 	class DrivesDataProvider : DataProvider<Drive>
 	{
-		public DrivesDataProvider()
+		public DrivesDataProvider(int updateInterval)
+			: base(updateInterval)
 		{
 			AddSearcher(new SelectQuery("SELECT Name, FreeSpace, VolumeName, Size FROM Win32_LogicalDisk WHERE Access != null"), UpdateGeneralInfo);
 			AddSearcher(new SelectQuery("SELECT Name, PercentDiskTime FROM Win32_PerfFormattedData_PerfDisk_LogicalDisk"), UpdatePersentDiskTimeInfo);

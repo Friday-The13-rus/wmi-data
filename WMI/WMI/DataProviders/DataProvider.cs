@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management;
 using System.Threading;
 using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace WMI.DataProviders
 {
@@ -21,6 +23,7 @@ namespace WMI.DataProviders
 
 		protected readonly SortedList<string, T> _data = new SortedList<string, T>();
 		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+		private readonly Timer _timer = new Timer();
 
 		private readonly IDictionary<ManagementObjectSearcher, Action<ManagementObjectSearcher>> _searchers =
 			new Dictionary<ManagementObjectSearcher, Action<ManagementObjectSearcher>>();
@@ -32,6 +35,26 @@ namespace WMI.DataProviders
 			Scope.Connect();
 		}
 
+		protected DataProvider(int updateInterval)
+		{
+			InitializeTimer(updateInterval);
+		}
+
+		private void InitializeTimer(int updateInterval)
+		{
+			_timer.Interval = updateInterval;
+			_timer.AutoReset = false;
+			_timer.Elapsed += TimerOnElapsed;
+			_timer.Start();
+		}
+
+		private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+		{
+			foreach (var searcher in _searchers)
+				searcher.Value(searcher.Key);
+			_timer.Start();
+		}
+
 		public void AddSearcher(SelectQuery query, Action<ManagementObjectSearcher> updateAction)
 		{
 			_searchers.Add(new ManagementObjectSearcher(Scope, query, Options), updateAction);
@@ -41,6 +64,9 @@ namespace WMI.DataProviders
 		{
 			if (!_disposed)
 			{
+				_timer.Stop();
+				_timer.Dispose();
+
 				_lock.Dispose();
 				foreach (var searcher in _searchers.Keys)
 				{
@@ -64,17 +90,6 @@ namespace WMI.DataProviders
 		public int ElementsCount
 		{
 			get { return _lock.ReadLock(() => _data.Count); }
-		}
-
-		public IEnumerable<ElapsedEventHandler> UpdateActions
-		{
-			get
-			{
-				foreach (var searcher in _searchers)
-				{
-					yield return (sender, args) => searcher.Value(searcher.Key);
-				}
-			}
 		}
 
 		protected void AddElement(string name, T item)

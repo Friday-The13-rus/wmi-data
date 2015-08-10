@@ -6,7 +6,7 @@ namespace WMI
 {
 	[ComVisible(true),
 	 Guid("A79AC85C-547C-3ED3-AD94-530DC4BBB672"),
-	 ProgId("WMI.GetData"),
+	 ProgId("WMI.DataReturner"),
 	 ClassInterface(ClassInterfaceType.AutoDual)]
 	public class DataReturner
 	{

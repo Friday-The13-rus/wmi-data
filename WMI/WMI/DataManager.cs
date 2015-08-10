@@ -14,39 +14,19 @@ namespace WMI
 		private readonly DrivesDataProvider _drivesDataProvider;
 		private readonly NetworkDataProvider _networkDataProvider;
 
-		private readonly Timer _timer = new Timer();
 		private bool _disposed;
 
 		public DataManager(int updateInterval)
 		{
-			_cpuDataProvider = new CpuDataProvider();
-			_drivesDataProvider = new DrivesDataProvider();
-			_networkDataProvider = new NetworkDataProvider();
-
-			_timer.Interval = updateInterval;
-
-			Subscribe(_timer, _cpuDataProvider.UpdateActions);
-			Subscribe(_timer, _drivesDataProvider.UpdateActions);
-			Subscribe(_timer, _networkDataProvider.UpdateActions);
-
-			_timer.Start();
-		}
-
-		private void Subscribe(Timer timer, IEnumerable<ElapsedEventHandler> actions)
-		{
-			foreach (var elapsedEventHandler in actions)
-			{
-				timer.Elapsed += elapsedEventHandler;
-			}
+			_cpuDataProvider = new CpuDataProvider(updateInterval);
+			_drivesDataProvider = new DrivesDataProvider(updateInterval);
+			_networkDataProvider = new NetworkDataProvider(updateInterval);
 		}
 
 		public void Dispose()
 		{
 			if (!_disposed)
 			{
-				_timer.Stop();
-				_timer.Dispose();
-
 				_cpuDataProvider.Dispose();
 				_drivesDataProvider.Dispose();
 				_networkDataProvider.Dispose();

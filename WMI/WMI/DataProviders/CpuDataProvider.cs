@@ -9,7 +9,8 @@ namespace WMI.DataProviders
 {
 	class CpuDataProvider : DataProvider<Core>
 	{
-		public CpuDataProvider()
+		public CpuDataProvider(int updateInterval)
+			: base(updateInterval)
 		{
 			AddSearcher(new SelectQuery("SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor"), Update);
 		}
