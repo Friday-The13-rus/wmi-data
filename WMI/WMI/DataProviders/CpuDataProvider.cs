@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Text;
 using WMI.DataClasses;
 
 namespace WMI.DataProviders
@@ -12,25 +8,11 @@ namespace WMI.DataProviders
 		public CpuDataProvider(int updateInterval)
 			: base(updateInterval)
 		{
-			AddSearcher(new SelectQuery("SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor"), Update);
-		}
-
-		private void Update(ManagementObjectSearcher searcher)
-		{
-			foreach (ManagementObject obj in searcher.Get())
-			{
-				string name = obj.GetName();
-
-				Core currentCore;
-				if (!_data.TryGetValue(name, out currentCore))
+			AddSearcher("Win32_PerfFormattedData_PerfOS_Processor",
+				new PropertySettersDictionary<Core>()
 				{
-					AddElement(name, new Core(obj));
-				}
-				else
-				{
-					UpdateElement(currentCore, obj);
-				}
-			}
+					{"PercentProcessorTime", (core, o) => core.UsePercent = Convert.ToByte(o)}
+				});
 		}
 	}
 }

@@ -42,7 +42,7 @@ namespace WMI
 			{
 				foreach (ManagementBaseObject obj in searcherGet)
 				{
-					_drives.Add(new Drive(obj));
+					//_drives.Add(new Drive(obj));
 					obj.Dispose();
 				}
 			}
@@ -53,7 +53,7 @@ namespace WMI
 			var newObject = dataUpdatedEventArgs.NewEvent.GetTargetInstance();
 			try
 			{
-				_network.Update(newObject);
+				//_network.Update(newObject);
 			}
 			finally
 			{
@@ -73,15 +73,15 @@ namespace WMI
 				var drive = _drives.Find(el => string.Equals(el.Name, objectName));
 				if (drive == null)
 				{
-					_drives.Add(new Drive(newObject));
+					//_drives.Add(new Drive(newObject));
 					_drives.Sort();
 				}
 				else
 				{
 					if (dataUpdatedEventArgs.NewEvent.IsInstanceDeletionEvent())
 						_drives.Remove(drive);
-					else
-						drive.Update(newObject);
+					//else
+						//drive.Update(newObject);
 				}
 			}
 			finally
@@ -99,12 +99,12 @@ namespace WMI
 				var core = _cores.Find(el => string.Equals(el.Name, objectName));
 				if (core == null)
 				{
-					_cores.Add(new Core(newObject));
+					//_cores.Add(new Core(newObject));
 					_cores.Sort();
 				}
 				else
 				{
-					core.Update(newObject);
+					//core.Update(newObject);
 				}
 			}
 			finally

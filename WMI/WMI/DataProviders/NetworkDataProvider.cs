@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Text;
-using WMI.DataClasses;
+﻿using WMI.DataClasses;
 
 namespace WMI.DataProviders
 {
@@ -12,24 +7,11 @@ namespace WMI.DataProviders
 		public NetworkDataProvider(int updateInterval)
 			: base(updateInterval)
 		{
-			AddSearcher(new SelectQuery("SELECT Name, BytesReceivedPerSec, BytesSentPerSec FROM Win32_PerfFormattedData_Tcpip_NetworkInterface"), Update);
-		}
-
-		private void Update(ManagementObjectSearcher searcher)
-		{
-			foreach (ManagementObject obj in searcher.Get())
+			AddSearcher("Win32_PerfFormattedData_Tcpip_NetworkInterface", new PropertySettersDictionary<NetworkInterface>()
 			{
-				var name = obj.GetName();
-				NetworkInterface networkInterface;
-				if (!_data.TryGetValue(name, out networkInterface))
-				{
-					AddElement(name, new NetworkInterface(obj));
-				}
-				else
-				{
-					UpdateElement(networkInterface, obj);
-				}
-			}
+				{"BytesReceivedPerSec", (@interface, o) => @interface.Received = (ulong) o},
+				{"BytesSentPerSec", (@interface, o) => @interface.Sent = (ulong) o}
+			});
 		}
 	}
 }
