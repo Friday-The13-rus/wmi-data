@@ -10,11 +10,12 @@ using Timer = System.Timers.Timer;
 
 namespace WMI.DataProviders
 {
-	abstract class DataProvider<T> : IDisposable
-		where T : NamedObject, new()
+	internal abstract class DataProvider : IDisposable
 	{
-		private static readonly ManagementScope Scope = new ManagementScope("root\\CIMV2");
-		private static readonly EnumerationOptions Options = new EnumerationOptions
+		protected bool _disposed;
+
+		protected static readonly ManagementScope Scope = new ManagementScope("root\\CIMV2");
+		protected static readonly EnumerationOptions Options = new EnumerationOptions
 		{
 			DirectRead = true,
 			EnsureLocatable = false,
@@ -23,16 +24,8 @@ namespace WMI.DataProviders
 			Rewindable = false
 		};
 
-		protected readonly SortedList<string, T> _data = new SortedList<string, T>();
-		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-		private readonly Timer _timer = new Timer();
-
-		private readonly IDictionary<ManagementObjectSearcher, Action<ManagementObjectSearcher>> _searchers =
-			new Dictionary<ManagementObjectSearcher, Action<ManagementObjectSearcher>>();
-
-		private readonly List<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
- 
-		private bool _disposed;
+		protected readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+		protected readonly Timer _timer = new Timer();
 
 		static DataProvider()
 		{
@@ -52,12 +45,13 @@ namespace WMI.DataProviders
 			_timer.Start();
 		}
 
+		protected abstract void UpdateEntities();
+
 		private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
 		{
 			try
 			{
-				foreach (var searcherEntity in _searcherEntities)
-					Update(searcherEntity);
+				UpdateEntities();
 			}
 			catch (Exception exception)
 			{
@@ -69,9 +63,29 @@ namespace WMI.DataProviders
 			}
 		}
 
-		public void AddSearcher(SelectQuery query, Action<ManagementObjectSearcher> updateAction)
+		public virtual void Dispose()
 		{
-			_searchers.Add(new ManagementObjectSearcher(Scope, query, Options), updateAction);
+			if (!_disposed)
+			{
+				_timer.Stop();
+				_timer.Dispose();
+
+				_lock.Dispose();
+				_disposed = true;
+			}
+			GC.SuppressFinalize(this);
+		}
+	}
+
+	internal abstract class DataProvider<T> : DataProvider
+		where T : NamedObject, new()
+	{
+		private readonly SortedList<string, T> _data = new SortedList<string, T>();
+		private readonly List<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
+
+		protected DataProvider(int updateInterval) 
+			: base(updateInterval)
+		{
 		}
 
 		public void AddSearcher(string table, PropertySettersDictionary<T> propertiesSetters, string condition = null, bool canAddElements = true, bool canRemoveElements = false)
@@ -81,6 +95,12 @@ namespace WMI.DataProviders
 			var searcherEntity = new SearcherEntity<T>(new ManagementObjectSearcher(Scope, selectQuery, Options), canAddElements,
 				canRemoveElements, propertiesSetters);
 			_searcherEntities.Add(searcherEntity);
+		}
+
+		protected override void UpdateEntities()
+		{
+			foreach (var searcherEntity in _searcherEntities)
+				Update(searcherEntity);
 		}
 
 		private void Update(SearcherEntity<T> searcherEntity)
@@ -122,7 +142,7 @@ namespace WMI.DataProviders
 			}
 		}
 
-		public void Dispose()
+		public override void Dispose()
 		{
 			if (!_disposed)
 			{
@@ -130,10 +150,7 @@ namespace WMI.DataProviders
 				_timer.Dispose();
 
 				_lock.Dispose();
-				foreach (var searcher in _searchers.Keys)
-				{
-					searcher.Dispose();
-				}
+				_searcherEntities.ForEach(entity => entity.Dispose());
 				_disposed = true;
 			}
 			GC.SuppressFinalize(this);
