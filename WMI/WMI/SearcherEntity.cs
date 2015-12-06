@@ -1,9 +1,12 @@
-﻿using System.Management;
+﻿using System;
+using System.Management;
 
 namespace WMI
 {
-	class SearcherEntity<T>
+	class SearcherEntity<T> : IDisposable
 	{
+		private bool _disposed;
+
 		public ManagementObjectSearcher Searcher { get; private set; }
 		public bool CanRemoveElements { get; private set; }
 		public bool CanAddElements { get; private set; }
@@ -15,6 +18,16 @@ namespace WMI
 			CanAddElements = canAddElements;
 			CanRemoveElements = canRemoveElements;
 			PropertySetters = propertySetters;
+		}
+
+		public void Dispose()
+		{
+			if (!_disposed)
+			{
+				Searcher.Dispose();
+				_disposed = true;
+			}
+			GC.SuppressFinalize(this);
 		}
 	}
 }
