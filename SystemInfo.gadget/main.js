@@ -1,29 +1,16 @@
 "use strict";
 
-onerror = Error;
-execScript('Function Message(prompt, title)\r\n'
-	+ ' Message = MsgBox(prompt, 16, title)\r\n'
-	+ 'End Function', "vbscript");
-
-if (!Array.prototype.forEach) {
-	Array.prototype.forEach = function (fun /*, thisp*/) {
-		var len = this.length;
-		if (typeof fun != "function")
-			throw new TypeError();
-
-		var thisp = arguments[1];
-		for (var i = 0; i < len; i++) {
-			if (i in this)
-				fun.call(thisp, this[i], i, this);
-		}
-	};
-}
+System.Gadget.settingsUI = "settings.html"
+System.Gadget.onSettingsClosed = SettingsClosed;
 
 var rowHeight = 14;
 var widthBar = 80;
 
 var dataElements = [];
-var NetLib = {};
+var wmi;
+var timerId;
+
+var NetworkAdapterName = "";
 
 function CpuObj() {
 	var cores = [];
@@ -45,8 +32,8 @@ function CpuObj() {
 
 	this.Update = function () {
 		var j = 0;
-		for (var i = 0; i < NetLib.GetCoresCount() ; i++) {
-			var temp = NetLib.GetProcessorData(i);
+		for (var i = 0; i < wmi.NetLib.GetCoresCount() ; i++) {
+			var temp = wmi.NetLib.GetProcessorData(i);
 
 			if (temp.name != "_Total") {
 				cores[j] = parseInt(temp.usePercent);
@@ -178,7 +165,7 @@ function DriveObj() {
 	}
 
 	this.Update = function () {
-		var drivesCount = NetLib.GetDrivesCount();
+		var drivesCount = wmi.NetLib.GetDrivesCount();
 		if (this.DrivesCount() > drivesCount) {
 			for (var i = this.DrivesCount() - 1; i >= drivesCount; i--) {
 				drives.pop();
@@ -193,7 +180,7 @@ function DriveObj() {
 		}
 
 		for (var i = 0; i < this.DrivesCount() ; i++) {
-			var temp = NetLib.GetDriveData(i);
+			var temp = wmi.NetLib.GetDriveData(i);
 
 			drives[i].Name = temp.name;
 			drives[i].FreeSpace = formatBytes(temp.freeSpace, 'b');
@@ -244,7 +231,7 @@ function NetObj() {
 		'</div>';
 
 	this.Update = function () {
-		var temp = NetLib.GetNetworkData("Realtek PCIe GBE Family Controller");
+		var temp = wmi.NetLib.GetNetworkData(NetworkAdapterName);
 		received = formatBytes(temp.received, 'b');
 		sent = formatBytes(temp.sent, 'b');
 	}
@@ -264,24 +251,34 @@ function Start() {
 		new NetObj()
 	);
 	CalculateHeight();
-
-	NetLib = GetLibrary();
-	NetLib.Start();
-
-	setInterval(Update, 1000);
+	LoadSettings();
+	
+	wmi = new WmiObj();
+	wmi.Start();
+	StartTimer();
 }
 
-function Error(message, source, lineno) {
-	var line = 'File: ' + source + '\r\nLine ' + lineno + '\r\n' +
-		'Message:' + message;
-	System.Diagnostics.EventLog.writeEntry(line, 1);
+function SettingsClosed(event) {
+	if (event.closeAction == event.Action.commit) {
+		LoadSettings()
+	}
+}
 
-	Message(line, 'Error!');
+function LoadSettings() {
+	NetworkAdapterName = new SettingsIO().Read().NetworkAdapter;
+}
+
+function StartTimer() {
+	timerId = setInterval(Update, 1000);
+}
+
+function StopTimer() {
+	clearInterval(timerId);
 }
 
 function Stop() {
-	NetLib.Stop();
-	UnregisterLibrary();
+	StopTimer();
+	wmi.Stop(true);
 }
 
 function Update() {

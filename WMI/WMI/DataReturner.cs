@@ -46,5 +46,15 @@ namespace WMI
 		{
 			return _data.GetNetworkData(name);
 		}
+
+		public int GetNetworkInterfacesCount()
+		{
+			return _data.GetNetworkInterfacesCount();
+		}
+
+		public string GetNetworkInterfaceName(int i)
+		{
+			return _data.GetNetworkInterfaceName(i);
+		}
 	}
 }

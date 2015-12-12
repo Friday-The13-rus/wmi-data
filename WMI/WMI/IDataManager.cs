@@ -13,5 +13,7 @@ namespace WMI
 		Core GetProcessorData(int i);
 		int GetCoresCount();
 		NetworkInterface GetNetworkData(string name);
+		string GetNetworkInterfaceName(int i);
+		int GetNetworkInterfacesCount();
 	}
 }

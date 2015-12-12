@@ -1,0 +1,16 @@
+body 
+{
+    width:200px;
+    height:100px;
+    left:0px;
+    top:0px;
+    margin: 5px;
+}
+.label
+{
+	margin-bottom: 5px; 
+}
+.selector
+{
+	width: 100%;
+}
