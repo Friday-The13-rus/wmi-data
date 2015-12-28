@@ -11,7 +11,9 @@ namespace WMI.DataProviders
 			{
 				{"BytesReceivedPerSec", (@interface, o) => @interface.Received = (ulong) o},
 				{"BytesSentPerSec", (@interface, o) => @interface.Sent = (ulong) o}
-			});
+			}, canAddElements: false);
+			AddSearcher("Win32_NetworkAdapter", new PropertySettersDictionary<NetworkInterface>(),
+				@"Manufacturer != 'Microsoft' AND NOT PNPDeviceID LIKE 'ROOT\\%'", canRemoveElements: true);
 		}
 	}
 }
