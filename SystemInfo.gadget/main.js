@@ -223,11 +223,11 @@ function NetObj() {
 	networkDiv.innerHTML =
 		'<div style="top:' + (0 * rowHeight) + 'px; left:3px;">' +
 			'<img src="image/down.png">' +
-			'<div id="NetReceived" style="left:13px; width:45px">0 байт</div>' +
+			'<div id="NetReceived" style="left:13px; width:45px; text-overflow: ellipsis; overflow: hidden;">0 байт</div>' +
 		'</div>' +
 		'<div style="top:' + (0 * rowHeight) + 'px; left:60px;">' +
 			'<img src="image/up.png">' +
-			'<div id="NetSent" style="left:13px; width:45px">0 байт</div>' +
+			'<div id="NetSent" style="left:13px; width:45px; text-overflow: ellipsis; overflow: hidden;">0 байт</div>' +
 		'</div>';
 
 	this.Update = function () {
