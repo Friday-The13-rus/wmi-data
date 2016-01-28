@@ -47,11 +47,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataClasses\NamedObject.cs" />
+    <Compile Include="DataClasses\Ram.cs" />
     <Compile Include="DataManager.cs" />
     <Compile Include="DataProviders\CpuDataProvider.cs" />
     <Compile Include="DataProviders\DataProvider.cs" />
     <Compile Include="DataProviders\DrivesDataProvider.cs" />
+    <Compile Include="DataProviders\IDataProvider.cs" />
     <Compile Include="DataProviders\NetworkDataProvider.cs" />
+    <Compile Include="DataProviders\RamDataProvider.cs" />
     <Compile Include="DataReturner.cs" />
     <Compile Include="DataClasses\Core.cs" />
     <Compile Include="DataClasses\Drive.cs" />

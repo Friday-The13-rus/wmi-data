@@ -77,8 +77,7 @@ namespace WMI.DataProviders
 		}
 	}
 
-	internal abstract class DataProvider<T> : DataProvider
-		where T : NamedObject, new()
+	internal abstract class DataProvider<T> : DataProvider, IDataProvider<T> where T : NamedObject, new()
 	{
 		private readonly SortedList<string, T> _data = new SortedList<string, T>();
 		private readonly List<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
@@ -88,7 +87,7 @@ namespace WMI.DataProviders
 		{
 		}
 
-		public void AddSearcher(string table, PropertySettersDictionary<T> propertiesSetters, string condition = null, bool canAddElements = true, bool canRemoveElements = false)
+		protected void AddSearcher(string table, PropertySettersDictionary<T> propertiesSetters, string condition = null, bool canAddElements = true, bool canRemoveElements = false)
 		{
 			var selectQuery = new SelectQuery(table, condition ?? string.Empty, propertiesSetters.Keys.ToArray());
 			selectQuery.SelectedProperties.Add("Name");
@@ -156,9 +155,9 @@ namespace WMI.DataProviders
 			GC.SuppressFinalize(this);
 		}
 
-		public T GetByIndex(int index)
+		public T this[int index]
 		{
-			return _lock.ReadLock(() => _data.Values[index]);
+			get { return _lock.ReadLock(() => _data.Values[index]); }
 		}
 
 		public T GetByName(string name)
@@ -167,7 +166,7 @@ namespace WMI.DataProviders
 			return _lock.ReadLock(() => _data.TryGetValue(name, out value) ? value : new T());
 		}
 
-		public int ElementsCount
+		public int Count
 		{
 			get { return _lock.ReadLock(() => _data.Count); }
 		}

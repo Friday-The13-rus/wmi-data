@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Timers;
 using WMI.DataClasses;
 using WMI.DataProviders;
 
@@ -10,9 +8,10 @@ namespace WMI
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
 	public class DataManager : IDataManager
 	{
-		private readonly CpuDataProvider _cpuDataProvider;
-		private readonly DrivesDataProvider _drivesDataProvider;
-		private readonly NetworkDataProvider _networkDataProvider;
+		private readonly IDataProvider<Core> _cpuDataProvider;
+		private readonly IDataProvider<Drive> _drivesDataProvider;
+		private readonly IDataProvider<NetworkInterface> _networkDataProvider;
+		private readonly IDataProvider<Ram> _ramDataProvider;
 
 		private bool _disposed;
 
@@ -21,6 +20,7 @@ namespace WMI
 			_cpuDataProvider = new CpuDataProvider(updateInterval);
 			_drivesDataProvider = new DrivesDataProvider(updateInterval);
 			_networkDataProvider = new NetworkDataProvider(updateInterval);
+			_ramDataProvider = new RamDataProvider(updateInterval);
 		}
 
 		public void Dispose()
@@ -30,30 +30,31 @@ namespace WMI
 				_cpuDataProvider.Dispose();
 				_drivesDataProvider.Dispose();
 				_networkDataProvider.Dispose();
+				_ramDataProvider.Dispose();
 
 				_disposed = true;
 			}
 			GC.SuppressFinalize(this);
 		}
 
-		public Drive GetDriveData(int drive)
+		public Drive GetDriveData(int i)
 		{
-			return _drivesDataProvider.GetByIndex(drive);
+			return _drivesDataProvider[i];
 		}
 
 		public int GetDrivesCount()
 		{
-			return _drivesDataProvider.ElementsCount;
+			return _drivesDataProvider.Count;
 		}
 
-		public Core GetProcessorData(int core)
+		public Core GetProcessorData(int i)
 		{
-			return _cpuDataProvider.GetByIndex(core);
+			return _cpuDataProvider[i];
 		}
 
 		public int GetCoresCount()
 		{
-			return _cpuDataProvider.ElementsCount;
+			return _cpuDataProvider.Count;
 		}
 
 		public NetworkInterface GetNetworkData(string name)
@@ -63,12 +64,22 @@ namespace WMI
 
 		public string GetNetworkInterfaceName(int i)
 		{
-			return _networkDataProvider.GetByIndex(i).Name;
+			return _networkDataProvider[i].Name;
 		}
 
 		public int GetNetworkInterfacesCount()
 		{
-			return _networkDataProvider.ElementsCount;
+			return _networkDataProvider.Count;
+		}
+
+		public Ram GetRamData()
+		{
+			return _ramDataProvider[0];
+		}
+
+		public bool HasRamData()
+		{
+			return _ramDataProvider.Count != 0;
 		}
 	}
 }

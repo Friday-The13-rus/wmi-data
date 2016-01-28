@@ -66,7 +66,7 @@ function CpuObj() {
 
 function RamObj() {
 	var free = 0;
-	var total = System.Machine.totalMemory;
+	var total = 0;
 	var use = 0;
 	var percentUse = 0;
 
@@ -79,20 +79,24 @@ function RamObj() {
 		'</div>';
 
 	this.Update = function () {
-		free = System.Machine.availableMemory;
-		use = total - free;
-		percentUse = (100 * use / total).toFixed();
+		if (!wmi.NetLib.HasRamData())
+			return;
+
+		var ramInfo = wmi.NetLib.GetRamData();
+		total = formatBytes(ramInfo.Total, 'kb');
+		free = formatBytes(ramInfo.Free, 'kb');
+		use = formatBytes(ramInfo.InUse, 'kb');
+		percentUse = (100 * ramInfo.InUse / ramInfo.Total).toFixed();
 	}
 
 	this.Draw = function () {
-		var freeRamTemp = formatBytes(free, 'mb');
-		freeRam.innerHTML = freeRamTemp;
+		freeRam.innerHTML = free;
 		percentUseRam.innerHTML = percentUse + ' %';
 		percentUseRamWidth.style.width = CalcWidthBar(percentUse);
 		ramSect.title =
-			'Всего памяти: ' + formatBytes(total, 'mb') + '\r\n' +
-			'Занято памяти: ' + formatBytes(use, 'mb') + '\r\n' +
-			'Свободно памяти: ' + freeRamTemp
+			'Всего памяти: ' + total + '\r\n' +
+			'Занято памяти: ' + use + '\r\n' +
+			'Свободно памяти: ' + free;
 	}
 }
 

@@ -56,5 +56,15 @@ namespace WMI
 		{
 			return _data.GetNetworkInterfaceName(i);
 		}
+
+		public Ram GetRamData()
+		{
+			return _data.GetRamData();
+		}
+
+		public bool HasRamData()
+		{
+			return _data.HasRamData();
+		}
 	}
 }

@@ -15,5 +15,7 @@ namespace WMI
 		NetworkInterface GetNetworkData(string name);
 		string GetNetworkInterfaceName(int i);
 		int GetNetworkInterfacesCount();
+		Ram GetRamData();
+		bool HasRamData();
 	}
 }
