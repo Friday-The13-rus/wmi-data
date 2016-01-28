@@ -2,7 +2,7 @@
 <gadget>
 	<name>System Info</name>
 	<author name="RogerUP"/>
-	<version>1.0</version>
+	<version>1.0.5</version>
 	<description>Выводит на экран такую информацию о системе, как:
 	Загрузка процессора
 	Занятая оперативная память
