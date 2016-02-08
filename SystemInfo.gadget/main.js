@@ -24,8 +24,8 @@ function CpuObj() {
 		cpuDiv.innerHTML +=
 			'<div id="Core' + i + '" style="top:' + (i * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
 			'<div style="top:' + (i * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-				'<img src="image/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-				'<img id="Core' + i + 'Width" src="image/bars/cpu1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+				'<img src="Images/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
+				'<img id="Core' + i + 'Width" src="Images/bars/cpu1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
 			'</div>';
 	}
 	totalPercent.innerHTML = 0 + ' %';
@@ -74,8 +74,8 @@ function RamObj() {
 	ramDiv.innerHTML =
 		'<div id="percentUseRam" style="top:' + (0 * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
 		'<div style="top:' + (0 * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-			'<img src="image/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-			'<img id="percentUseRamWidth" src="image/bars/ram1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+			'<img src="Images/bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
+			'<img id="percentUseRamWidth" src="Images/bars/ram1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
 		'</div>';
 
 	this.Update = function () {
@@ -118,7 +118,7 @@ function DriveObj() {
 
 	var PaintDrive = function (i) {
 		hddDiv.innerHTML +=
-			'<img style="top:' + ((i * 3 + 0) * rowHeight + 3 * (i - 1)) + 'px; left:-1px;" class="divider" src="image/horizontalDivider.png" alt=""/>' +
+			'<img style="top:' + ((i * 3 + 0) * rowHeight + 3 * (i - 1)) + 'px; left:-1px;" class="divider" src="Images/horizontalDivider.png" alt=""/>' +
 			'<div id="Drive' + i + '" style="top:' + (3 * i * (rowHeight + 1)) + 'px; left:0px; width:120px; height:' + (3 * rowHeight) + 'px; ">' +
 				'<div id="Drive' + i + 'Name" style="top:' + 0 * rowHeight + 'px; left:3px; text-overflow: ellipsis; overflow: hidden; width: 65px;">null</div>' +
 				'<div id="Drive' + i + 'FreeSpace" style="top:' + 0 * rowHeight + 'px; right:4px;">0</div>' +
