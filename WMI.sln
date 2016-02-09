@@ -1,0 +1,68 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMI", "WMI\WMI\WMI.csproj", "{205CAB76-D744-4406-9CAA-EF57EEA797F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDll", "WMI\TestDll\TestDll.csproj", "{752FE83E-A3BF-4FE4-BAB5-A3D623233739}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SystemInfo.gadget", "SystemInfo.gadget", "{03CDB974-45FB-48D8-9423-50A97A4481EA}"
+	ProjectSection(SolutionItems) = preProject
+		SystemInfo.gadget\common.js = SystemInfo.gadget\common.js
+		SystemInfo.gadget\gadget.xml = SystemInfo.gadget\gadget.xml
+		SystemInfo.gadget\main.css = SystemInfo.gadget\main.css
+		SystemInfo.gadget\Main.html = SystemInfo.gadget\Main.html
+		SystemInfo.gadget\main.js = SystemInfo.gadget\main.js
+		SystemInfo.gadget\settings.css = SystemInfo.gadget\settings.css
+		SystemInfo.gadget\settings.html = SystemInfo.gadget\settings.html
+		SystemInfo.gadget\settings.js = SystemInfo.gadget\settings.js
+		SystemInfo.gadget\settingsIO.js = SystemInfo.gadget\settingsIO.js
+		SystemInfo.gadget\WMI.dll = SystemInfo.gadget\WMI.dll
+		SystemInfo.gadget\wmi.js = SystemInfo.gadget\wmi.js
+		SystemInfo.gadget\workwithlibrary.js = SystemInfo.gadget\workwithlibrary.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{02E7292A-4463-430F-BBDD-BCC039B3B26E}"
+	ProjectSection(SolutionItems) = preProject
+		SystemInfo.gadget\Images\bg4.png = SystemInfo.gadget\Images\bg4.png
+		SystemInfo.gadget\Images\bg41.png = SystemInfo.gadget\Images\bg41.png
+		SystemInfo.gadget\Images\bg42.png = SystemInfo.gadget\Images\bg42.png
+		SystemInfo.gadget\Images\down.png = SystemInfo.gadget\Images\down.png
+		SystemInfo.gadget\Images\horizontalDivider.png = SystemInfo.gadget\Images\horizontalDivider.png
+		SystemInfo.gadget\Images\icon.png = SystemInfo.gadget\Images\icon.png
+		SystemInfo.gadget\Images\up.png = SystemInfo.gadget\Images\up.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bars", "Bars", "{2D5F7514-20C5-4910-8CA3-662017365B86}"
+	ProjectSection(SolutionItems) = preProject
+		SystemInfo.gadget\Images\Bars\back1.png = SystemInfo.gadget\Images\Bars\back1.png
+		SystemInfo.gadget\Images\Bars\cpu1.png = SystemInfo.gadget\Images\Bars\cpu1.png
+		SystemInfo.gadget\Images\Bars\hdd1.png = SystemInfo.gadget\Images\Bars\hdd1.png
+		SystemInfo.gadget\Images\Bars\hdd2.png = SystemInfo.gadget\Images\Bars\hdd2.png
+		SystemInfo.gadget\Images\Bars\ram1.png = SystemInfo.gadget\Images\Bars\ram1.png
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{205CAB76-D744-4406-9CAA-EF57EEA797F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{205CAB76-D744-4406-9CAA-EF57EEA797F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{205CAB76-D744-4406-9CAA-EF57EEA797F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{205CAB76-D744-4406-9CAA-EF57EEA797F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{752FE83E-A3BF-4FE4-BAB5-A3D623233739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{752FE83E-A3BF-4FE4-BAB5-A3D623233739}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{752FE83E-A3BF-4FE4-BAB5-A3D623233739}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{752FE83E-A3BF-4FE4-BAB5-A3D623233739}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{02E7292A-4463-430F-BBDD-BCC039B3B26E} = {03CDB974-45FB-48D8-9423-50A97A4481EA}
+		{2D5F7514-20C5-4910-8CA3-662017365B86} = {02E7292A-4463-430F-BBDD-BCC039B3B26E}
+	EndGlobalSection
+EndGlobal
