@@ -79,12 +79,13 @@ namespace WMI.DataProviders
 
 	internal abstract class DataProvider<T> : DataProvider, IDataProvider<T> where T : NamedObject, new()
 	{
-		private readonly SortedList<string, T> _data = new SortedList<string, T>();
+		protected SortedList<string, T> _data;
 		private readonly List<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
 
 		protected DataProvider(int updateInterval) 
 			: base(updateInterval)
 		{
+			_data = new SortedList<string, T>();
 		}
 
 		protected void AddSearcher(string table, PropertySettersDictionary<T> propertiesSetters, string condition = null, bool canAddElements = true, bool canRemoveElements = false)

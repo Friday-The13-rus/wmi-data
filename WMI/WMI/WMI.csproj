@@ -46,6 +46,7 @@
     <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CanonicalComparer.cs" />
     <Compile Include="DataClasses\NamedObject.cs" />
     <Compile Include="DataClasses\Ram.cs" />
     <Compile Include="DataManager.cs" />
