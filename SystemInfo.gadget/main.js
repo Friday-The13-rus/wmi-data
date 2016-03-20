@@ -24,8 +24,8 @@ function CpuObj() {
 		cpuDiv.innerHTML +=
 			'<div id="Core' + i + '" style="top:' + (i * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
 			'<div style="top:' + (i * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-				'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-				'<img id="Core' + i + 'Width" src="Images/Bars/cpu1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+				'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px" class="barBackground"/>' +
+				'<img id="Core' + i + 'Width" src="Images/Bars/cpu1.png" class="barActivity"/>' +
 			'</div>';
 	}
 	totalPercent.innerHTML = 0 + ' %';
@@ -74,8 +74,8 @@ function RamObj() {
 	ramDiv.innerHTML =
 		'<div id="percentUseRam" style="top:' + (0 * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
 		'<div style="top:' + (0 * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-			'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-			'<img id="percentUseRamWidth" src="Images/Bars/ram1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+			'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px" class="barBackground"/>' +
+			'<img id="percentUseRamWidth" src="Images/Bars/ram1.png" class="barActivity"/>' +
 		'</div>';
 
 	this.Update = function () {
@@ -124,13 +124,13 @@ function DriveObj() {
 				'<div id="Drive' + i + 'FreeSpace" style="top:' + 0 * rowHeight + 'px; right:4px;">0</div>' +
 				'<div id="Drive' + i + 'UsePerc" style="top:' + 1 * rowHeight + 'px; left:3px; width:30px">0 %</div>' +
 				'<div style="top:' + 1 * rowHeight + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-					'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-					'<img id="Drive' + i + 'UsePercWidth" src="Images/Bars/hdd1.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+					'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px" class="barBackground"/>' +
+					'<img id="Drive' + i + 'UsePercWidth" src="Images/Bars/hdd1.png" class="barActivity"/>' +
 				'</div>' +
 				'<div id="Drive' + i + 'ActivePercent" style="top:' + 2 * rowHeight + 'px; left:3px; width:30px">0 %</div>' +
 				'<div style="top:' + 2 * rowHeight + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
-					'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px; height:8px; border: 1px solid #111111;"/>' +
-					'<img id="Drive' + i + 'ActivePercentWidth" src="Images/Bars/hdd2.png" style="width:0px; height:8px; top:1px; left:1px;"/>' +
+					'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px" class="barBackground"/>' +
+					'<img id="Drive' + i + 'ActivePercentWidth" src="Images/Bars/hdd2.png" class="barActivity"/>' +
 				'</div>' +
 			'</div>';
 	}

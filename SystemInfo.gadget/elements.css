@@ -1,0 +1,12 @@
+﻿.barActivity
+{
+	width:0px; 
+	height:8px; 
+	border: 1px solid transparent;
+}
+
+.barBackground
+{
+	height:8px; 
+	border: 1px solid #111111;
+}
