@@ -1,4 +1,4 @@
-var dllCLSID = "{A79AC85C-547C-3ED3-AD94-530DC4BBB672}";
+﻿var dllCLSID = "{A79AC85C-547C-3ED3-AD94-530DC4BBB672}";
 var Classname = "WMI.DataReturner";
 var LibPath = "file:///" + System.Gadget.path.replace(new RegExp("\\\\", "g"), "/") + "/WMI.dll"
 var LibName = "WMI";

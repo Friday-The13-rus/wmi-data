@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 onerror = Error;
 execScript('Function Message(prompt, title)\r\n'

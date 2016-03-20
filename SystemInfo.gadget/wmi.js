@@ -1,4 +1,4 @@
-function WmiObj() {
+﻿function WmiObj() {
 	this.NetLib = {};
 
 	var StopTimer = function () {
