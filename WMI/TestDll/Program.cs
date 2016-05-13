@@ -26,16 +26,16 @@ namespace TestDll
 		{
 			Timer.Elapsed += (sender, args) =>
 			{
-				for (int i = 0; i < dr.GetCoresCount(); i++)
-				{
-					var core = dr.GetProcessorData(i);
-					Console.WriteLine("C {0} - {1}", core.Name, core.UsePercent);
-				}
-				for (int i = 0; i < dr.GetDrivesCount(); i++)
-				{
-					var drive = dr.GetDriveData(i);
-					Console.WriteLine("D {0} - {1}", drive.Name, drive.ActivePercent);
-				}
+				//for (int i = 0; i < dr.GetCoresCount(); i++)
+				//{
+				//	var core = dr.GetProcessorData(i);
+				//	Console.WriteLine("C {0} - {1}", core.Name, core.UsePercent);
+				//}
+				//for (int i = 0; i < dr.GetDrivesCount(); i++)
+				//{
+				//	var drive = dr.GetDriveData(i);
+				//	Console.WriteLine("D {0} - {1}", drive.Name, drive.ActivePercent);
+				//}
 			};
 			Timer.Start();
 		}

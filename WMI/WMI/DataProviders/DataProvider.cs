@@ -172,6 +172,11 @@ namespace WMI.DataProviders
 			get { return _lock.ReadLock(() => _data.Count); }
 		}
 
+		public T[] GetAll()
+		{
+			return _lock.ReadLock(() => _data.Values.ToArray());
+		}
+
 		private void AddElement(string name, T item)
 		{
 			_lock.WriteLock(() => _data.Add(name, item));

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using Microsoft.JScript;
 using WMI.DataClasses;
 
 namespace WMI
@@ -22,41 +22,6 @@ namespace WMI
 			_data.Dispose();
 		}
 
-		public Drive GetDriveData(int i)
-		{
-			return _data.GetDriveData(i);
-		}
-
-		public int GetDrivesCount()
-		{
-			return _data.GetDrivesCount();
-		}
-
-		public Core GetProcessorData(int i)
-		{
-			return _data.GetProcessorData(i);
-		}
-
-		public int GetCoresCount()
-		{
-			return _data.GetCoresCount();
-		}
-
-		public NetworkInterface GetNetworkData(string name)
-		{
-			return _data.GetNetworkData(name);
-		}
-
-		public int GetNetworkInterfacesCount()
-		{
-			return _data.GetNetworkInterfacesCount();
-		}
-
-		public string GetNetworkInterfaceName(int i)
-		{
-			return _data.GetNetworkInterfaceName(i);
-		}
-
 		public Ram GetRamData()
 		{
 			return _data.GetRamData();
@@ -65,6 +30,21 @@ namespace WMI
 		public bool HasRamData()
 		{
 			return _data.HasRamData();
+		}
+
+		public ArrayObject GetCpuData()
+		{
+			return GlobalObject.Array.ConstructArray(_data.GetProcessorData());
+		}
+
+		public ArrayObject GetDriveData()
+		{
+			return GlobalObject.Array.ConstructArray(_data.GetDriveData());
+		}
+
+		public ArrayObject GetNetworkData()
+		{
+			return GlobalObject.Array.ConstructArray(_data.GetNetworkData());
 		}
 	}
 }

@@ -59,12 +59,11 @@ function SettingsObj() {
 	var settingsIO = new SettingsIO();
 	var adaptersManager = new SelectorManager(InternetAdapters);;
 	
-	var LoadAdapters = function() {
-		var networkAdaptersCount = wmi.NetLib.GetNetworkInterfacesCount();
+	var LoadAdapters = function () {
+		var networkAdapters = wmi.NetLib.GetNetworkData();
 		var adapters = [];
-		for (var i = 0; i < networkAdaptersCount; i++) {
-			var adapterName = wmi.NetLib.GetNetworkInterfaceName(i);
-			adapters.push(adapterName);
+		for (var i = 0; i < networkAdapters.length; i++) {
+			adapters.push(networkAdapters[i].Name);
 		}
 		return adapters;
 	}

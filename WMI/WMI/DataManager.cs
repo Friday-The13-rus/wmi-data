@@ -37,39 +37,19 @@ namespace WMI
 			GC.SuppressFinalize(this);
 		}
 
-		public Drive GetDriveData(int i)
+		public Drive[] GetDriveData()
 		{
-			return _drivesDataProvider[i];
+			return _drivesDataProvider.GetAll();
 		}
 
-		public int GetDrivesCount()
+		public Core[] GetProcessorData()
 		{
-			return _drivesDataProvider.Count;
+			return _cpuDataProvider.GetAll();
 		}
 
-		public Core GetProcessorData(int i)
+		public NetworkInterface[] GetNetworkData()
 		{
-			return _cpuDataProvider[i];
-		}
-
-		public int GetCoresCount()
-		{
-			return _cpuDataProvider.Count;
-		}
-
-		public NetworkInterface GetNetworkData(string name)
-		{
-			return _networkDataProvider.GetByName(name);
-		}
-
-		public string GetNetworkInterfaceName(int i)
-		{
-			return _networkDataProvider[i].Name;
-		}
-
-		public int GetNetworkInterfacesCount()
-		{
-			return _networkDataProvider.Count;
+			return _networkDataProvider.GetAll();
 		}
 
 		public Ram GetRamData()

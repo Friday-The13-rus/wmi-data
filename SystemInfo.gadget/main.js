@@ -32,27 +32,17 @@ function CpuObj() {
 
 	this.Update = function () {
 		var j = 0;
-		for (var i = 0; i < wmi.NetLib.GetCoresCount() ; i++) {
-			var temp = wmi.NetLib.GetProcessorData(i);
-
-			if (temp.name != "_Total") {
-				cores[j] = parseInt(temp.usePercent);
+		var newCpuData = wmi.NetLib.GetCpuData();
+		for (var i = 0; i < newCpuData.length; i++) {
+			var core = newCpuData[i];
+			if (core.Name != "_Total") {
+				cores[j] = parseInt(core.usePercent);
 				j++;
 			}
 			else {
-				allCores = parseInt(temp.usePercent);
+				allCores = parseInt(core.usePercent);
 			}
 		}
-	}
-
-	this.UpdateWithoutWMI = function () {
-		var tempAllCores = 0;
-		for (var i = 0; i < System.Machine.CPUs.count; i++) {
-			var tempPercent = Math.min(Math.max(System.Machine.CPUs.item(i).usagePercentage, 0), 100);
-			cores[i] = parseInt(tempPercent);
-			tempAllCores += cores[i];
-		}
-		allCores = Math.round(tempAllCores / this.CoresCount());
 	}
 
 	this.Draw = function () {
@@ -169,7 +159,9 @@ function DriveObj() {
 	}
 
 	this.Update = function () {
-		var drivesCount = wmi.NetLib.GetDrivesCount();
+		var newDrivesData = wmi.NetLib.GetDriveData();
+
+		var drivesCount = newDrivesData.length;
 		if (this.DrivesCount() > drivesCount) {
 			for (var i = this.DrivesCount() - 1; i >= drivesCount; i--) {
 				drives.pop();
@@ -184,7 +176,7 @@ function DriveObj() {
 		}
 
 		for (var i = 0; i < this.DrivesCount() ; i++) {
-			var temp = wmi.NetLib.GetDriveData(i);
+			var temp = newDrivesData[i];
 
 			drives[i].Name = temp.name;
 			drives[i].FreeSpace = formatBytes(temp.freeSpace, 'b');
@@ -235,9 +227,15 @@ function NetObj() {
 		'</div>';
 
 	this.Update = function () {
-		var temp = wmi.NetLib.GetNetworkData(NetworkAdapterName);
-		received = formatBytes(temp.received, 'b');
-		sent = formatBytes(temp.sent, 'b');
+		var newNetworkData = wmi.NetLib.GetNetworkData();
+		for (var i = 0; i < newNetworkData.length; i++) {
+			var networkAdapter = newNetworkData[i];
+			if (networkAdapter.Name == NetworkAdapterName) {
+				received = formatBytes(networkAdapter.received, 'b');
+				sent = formatBytes(networkAdapter.sent, 'b');
+				break;
+			}
+		}
 	}
 
 	this.Draw = function () {

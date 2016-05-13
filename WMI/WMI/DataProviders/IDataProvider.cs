@@ -8,5 +8,6 @@ namespace WMI.DataProviders
 		T this[int index] { get; }
 		T GetByName(string name);
 		int Count { get; }
+		T[] GetAll();
 	}
 }
