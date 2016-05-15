@@ -55,7 +55,7 @@ namespace WMI.DataProviders
 			}
 			catch (Exception exception)
 			{
-				EventLog.WriteEntry("Application", exception.ToString(), EventLogEntryType.Error);
+				EventLog.WriteEntry("SystemInfo Windows Sidebar Gadget", exception.ToString(), EventLogEntryType.Error);
 			}
 			finally
 			{
