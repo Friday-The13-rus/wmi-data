@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace WMI
 {
-	class CanonicalComparer : IComparer<string>
+	internal class CanonicalComparer : IComparer<string>
 	{
 		public int Compare(string x, string y)
 		{

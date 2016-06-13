@@ -92,8 +92,8 @@ namespace WMI.DataProviders
 	{
 		private bool _disposed;
 
-		private readonly SortedList<string, T> _data;
-		private readonly List<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
+		private readonly IDictionary<string, T> _data;
+		private readonly ICollection<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
 
 		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
@@ -131,35 +131,48 @@ namespace WMI.DataProviders
 
 			foreach (ManagementObject obj in searcherEntity.Searcher.Get())
 			{
-				string name = obj.GetName();
+				var name = obj.GetName();
 				T current;
 				if (!_data.TryGetValue(name, out current))
 				{
 					if (!searcherEntity.CanAddElements)
 						continue;
-					current = new T {Name = name};
-					_lock.WriteLock(() => _data.Add(name, current));
+					current = Add(name);
 				}
 
-				_lock.WriteLock(() =>
-				{
-					foreach (var propertiesSetter in searcherEntity.PropertySetters)
-					{
-						propertiesSetter.Value(current, obj[propertiesSetter.Key]);
-					}
-				});
+				UpdateProperties(current, searcherEntity.PropertySetters, obj);
 
-				if (!searcherEntity.CanRemoveElements)
-					continue;
-				removedEntities.Remove(name);
+				if (searcherEntity.CanRemoveElements)
+					removedEntities.Remove(name);
 			}
 
-			if (!searcherEntity.CanRemoveElements)
-				return;
+			if (searcherEntity.CanRemoveElements)
+				Remove(removedEntities);
+		}
 
+		private T Add(string key)
+		{
+			var value = new T() { Name = key };
+			_lock.WriteLock(() => _data.Add(key, value));
+			return value;
+		}
+
+		private void UpdateProperties(T item, PropertySettersDictionary<T> propertySetters, ManagementObject managementObject)
+		{
 			_lock.WriteLock(() =>
 			{
-				foreach (var entity in removedEntities)
+				foreach (var propertiesSetter in propertySetters)
+				{
+					propertiesSetter.Value(item, managementObject[propertiesSetter.Key]);
+				}
+			});
+		}
+
+		private void Remove(IEnumerable<string> keys)
+		{
+			_lock.WriteLock(() =>
+			{
+				foreach (var entity in keys)
 				{
 					_data.Remove(entity);
 				}
@@ -174,7 +187,8 @@ namespace WMI.DataProviders
 			if (disposing)
 			{
 				_lock.Dispose();
-				_searcherEntities.ForEach(entity => entity.Dispose());
+				foreach (var searcherEntity in _searcherEntities)
+					searcherEntity.Dispose();
 			}
 
 			_disposed = true;
@@ -182,9 +196,14 @@ namespace WMI.DataProviders
 			base.Dispose(disposing);
 		}
 
+		~DataProvider()
+		{
+			Dispose(false);
+		}
+
 		public T this[int index]
 		{
-			get { return _lock.ReadLock(() => _data.Values[index]); }
+			get { return _lock.ReadLock(() => _data.ElementAt(index).Value ); }
 		}
 
 		public int Count
