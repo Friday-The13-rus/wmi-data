@@ -125,7 +125,7 @@ namespace WMI.DataProviders
 
 		private void Update(SearcherEntity<T> searcherEntity)
 		{
-			ISet<string> removedEntities = null;
+			ICollection<string> removedEntities = null;
 			if (searcherEntity.CanRemoveElements)
 				removedEntities = new HashSet<string>(_data.Keys);
 
@@ -138,7 +138,7 @@ namespace WMI.DataProviders
 					if (!searcherEntity.CanAddElements)
 						continue;
 					current = new T {Name = name};
-					AddElement(name, current);
+					_lock.WriteLock(() => _data.Add(name, current));
 				}
 
 				_lock.WriteLock(() =>
@@ -156,10 +156,14 @@ namespace WMI.DataProviders
 
 			if (!searcherEntity.CanRemoveElements)
 				return;
-			foreach (var entity in removedEntities)
+
+			_lock.WriteLock(() =>
 			{
-				_data.Remove(entity);
-			}
+				foreach (var entity in removedEntities)
+				{
+					_data.Remove(entity);
+				}
+			});
 		}
 
 		protected override void Dispose(bool disposing)
@@ -183,12 +187,6 @@ namespace WMI.DataProviders
 			get { return _lock.ReadLock(() => _data.Values[index]); }
 		}
 
-		public T GetByName(string name)
-		{
-			T value;
-			return _lock.ReadLock(() => _data.TryGetValue(name, out value) ? value : new T());
-		}
-
 		public int Count
 		{
 			get { return _lock.ReadLock(() => _data.Count); }
@@ -197,11 +195,6 @@ namespace WMI.DataProviders
 		public T[] GetAll()
 		{
 			return _lock.ReadLock(() => _data.Values.ToArray());
-		}
-
-		private void AddElement(string name, T item)
-		{
-			_lock.WriteLock(() => _data.Add(name, item));
 		}
 	}
 }

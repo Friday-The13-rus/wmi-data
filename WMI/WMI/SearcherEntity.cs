@@ -3,14 +3,14 @@ using System.Management;
 
 namespace WMI
 {
-	class SearcherEntity<T> : IDisposable
+	internal class SearcherEntity<T> : IDisposable
 	{
 		private bool _disposed;
 
-		public ManagementObjectSearcher Searcher { get; private set; }
-		public bool CanRemoveElements { get; private set; }
-		public bool CanAddElements { get; private set; }
-		public PropertySettersDictionary<T> PropertySetters { get; private set; }
+		public ManagementObjectSearcher Searcher { get; }
+		public bool CanRemoveElements { get; }
+		public bool CanAddElements { get; }
+		public PropertySettersDictionary<T> PropertySetters { get; }
 
 		public SearcherEntity(ManagementObjectSearcher searcher, bool canAddElements, bool canRemoveElements, PropertySettersDictionary<T> propertySetters)
 		{
