@@ -12,7 +12,7 @@ namespace WMI.DataProviders
 {
 	internal abstract class DataProvider : IDisposable
 	{
-		protected bool _disposed;
+		private bool _disposed;
 
 		protected static readonly ManagementScope Scope = new ManagementScope("root\\CIMV2");
 		protected static readonly EnumerationOptions Options = new EnumerationOptions
@@ -24,8 +24,7 @@ namespace WMI.DataProviders
 			Rewindable = false
 		};
 
-		protected readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-		protected readonly Timer _timer = new Timer();
+		private readonly Timer _timer = new Timer();
 
 		static DataProvider()
 		{
@@ -63,29 +62,50 @@ namespace WMI.DataProviders
 			}
 		}
 
-		public virtual void Dispose()
+		public void Dispose()
 		{
-			if (!_disposed)
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		~DataProvider()
+		{
+			Dispose(false);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed)
+				return;
+
+			if (disposing)
 			{
 				_timer.Stop();
 				_timer.Dispose();
-
-				_lock.Dispose();
-				_disposed = true;
 			}
-			GC.SuppressFinalize(this);
+
+			_disposed = true;
 		}
 	}
 
 	internal abstract class DataProvider<T> : DataProvider, IDataProvider<T> where T : NamedObject, new()
 	{
-		protected SortedList<string, T> _data;
+		private bool _disposed;
+
+		private readonly SortedList<string, T> _data;
 		private readonly List<SearcherEntity<T>> _searcherEntities = new List<SearcherEntity<T>>();
 
-		protected DataProvider(int updateInterval) 
+		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
+		protected DataProvider(int updateInterval)
+			:this(updateInterval, Comparer<string>.Default)
+		{
+		}
+
+		protected DataProvider(int updateInterval, IComparer<string> dataComparer) 
 			: base(updateInterval)
 		{
-			_data = new SortedList<string, T>();
+			_data = new SortedList<string, T>(dataComparer);
 		}
 
 		protected void AddSearcher(string table, PropertySettersDictionary<T> propertiesSetters, string condition = null, bool canAddElements = true, bool canRemoveElements = false)
@@ -142,18 +162,20 @@ namespace WMI.DataProviders
 			}
 		}
 
-		public override void Dispose()
+		protected override void Dispose(bool disposing)
 		{
-			if (!_disposed)
-			{
-				_timer.Stop();
-				_timer.Dispose();
+			if (_disposed)
+				return;
 
+			if (disposing)
+			{
 				_lock.Dispose();
 				_searcherEntities.ForEach(entity => entity.Dispose());
-				_disposed = true;
 			}
-			GC.SuppressFinalize(this);
+
+			_disposed = true;
+
+			base.Dispose(disposing);
 		}
 
 		public T this[int index]

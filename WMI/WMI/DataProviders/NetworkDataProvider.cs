@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
-using WMI.DataClasses;
+﻿using WMI.DataClasses;
 
 namespace WMI.DataProviders
 {
-	class NetworkDataProvider : DataProvider<NetworkInterface>
+	internal class NetworkDataProvider : DataProvider<NetworkInterface>
 	{
 		public NetworkDataProvider(int updateInterval)
-			: base(updateInterval)
+			: base(updateInterval, new CanonicalComparer())
 		{
-			_data = new SortedList<string, NetworkInterface>(new CanonicalComparer());
-
 			AddSearcher("Win32_PerfFormattedData_Tcpip_NetworkInterface", new PropertySettersDictionary<NetworkInterface>()
 			{
 				{"BytesReceivedPerSec", (@interface, o) => @interface.Received = (ulong) o},

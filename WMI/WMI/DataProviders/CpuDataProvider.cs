@@ -3,7 +3,7 @@ using WMI.DataClasses;
 
 namespace WMI.DataProviders
 {
-	class CpuDataProvider : DataProvider<Core>
+	internal class CpuDataProvider : DataProvider<Core>
 	{
 		public CpuDataProvider(int updateInterval)
 			: base(updateInterval)

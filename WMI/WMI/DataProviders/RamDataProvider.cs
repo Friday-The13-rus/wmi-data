@@ -2,7 +2,7 @@
 
 namespace WMI.DataProviders
 {
-	class RamDataProvider : DataProvider<Ram>
+	internal class RamDataProvider : DataProvider<Ram>
 	{
 		public RamDataProvider(int updateInterval) : base(updateInterval)
 		{

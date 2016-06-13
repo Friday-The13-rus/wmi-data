@@ -3,7 +3,7 @@ using WMI.DataClasses;
 
 namespace WMI.DataProviders
 {
-	class DrivesDataProvider : DataProvider<Drive>
+	internal class DrivesDataProvider : DataProvider<Drive>
 	{
 		public DrivesDataProvider(int updateInterval)
 			: base(updateInterval)
