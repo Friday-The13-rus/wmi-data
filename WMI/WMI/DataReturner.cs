@@ -10,7 +10,7 @@ namespace WMI
 	 ClassInterface(ClassInterfaceType.AutoDual)]
 	public class DataReturner
 	{
-		IDataManager _data;
+		private IDataManager _data;
 
 		public void Start()
 		{
@@ -32,17 +32,17 @@ namespace WMI
 			return _data.HasRamData();
 		}
 
-		public ArrayObject GetCpuData()
+		public object GetCpuData()
 		{
 			return GlobalObject.Array.ConstructArray(_data.GetProcessorData());
 		}
 
-		public ArrayObject GetDriveData()
+		public object GetDriveData()
 		{
 			return GlobalObject.Array.ConstructArray(_data.GetDriveData());
 		}
 
-		public ArrayObject GetNetworkData()
+		public object GetNetworkData()
 		{
 			return GlobalObject.Array.ConstructArray(_data.GetNetworkData());
 		}
