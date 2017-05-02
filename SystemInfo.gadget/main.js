@@ -154,8 +154,13 @@ function DriveObj() {
 		PaintDrive(i);
 	}
 
-	var OpenDrive = function () {
-		System.Shell.execute(this.outerText.slice(0, 2));
+	var pathAttributeName = 'data-path';
+
+	var OpenDrive = function() {
+		var path = this.getAttribute(pathAttributeName);
+		if (path == null)
+			return;
+		System.Shell.execute(path);
 	}
 
 	this.Update = function () {
@@ -192,6 +197,7 @@ function DriveObj() {
 		for (i = 0; i < this.DrivesCount() ; i++) {
 			var drive = document.getElementById('Drive' + i);
 			var driveName = drives[i].Name + ' ' + drives[i].VolumeName;
+			drive.setAttribute(pathAttributeName, drives[i].Name);
 			drive.onclick = OpenDrive;
 			drive.title = driveName + '\r\n' +
 				'Всего места: ' + drives[i].Space + '\r\n' +

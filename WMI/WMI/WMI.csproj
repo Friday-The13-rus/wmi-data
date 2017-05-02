@@ -67,6 +67,7 @@
     <Compile Include="PropertySettersDictionary.cs" />
     <Compile Include="ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="SearcherEntity.cs" />
+    <Compile Include="TrimEndSlashesComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wmiKey.snk" />

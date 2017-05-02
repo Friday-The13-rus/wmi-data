@@ -2,7 +2,7 @@
 var Classname = "WMI.DataReturner";
 var LibPath = "file:///" + System.Gadget.path.replace(new RegExp("\\\\", "g"), "/") + "/WMI.dll"
 var LibName = "WMI";
-var Version = "1.0.0.5"
+var Version = "1.0.0.6"
 var oShell = new ActiveXObject("WScript.Shell");
 var token = "7cc237d377f44c1e";
 var runtimeVersion = "v4.0.30319";
