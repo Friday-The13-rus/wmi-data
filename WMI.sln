@@ -19,7 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SystemInfo.gadget", "System
 		SystemInfo.gadget\settings.html = SystemInfo.gadget\settings.html
 		SystemInfo.gadget\settings.js = SystemInfo.gadget\settings.js
 		SystemInfo.gadget\settingsIO.js = SystemInfo.gadget\settingsIO.js
-		SystemInfo.gadget\WMI.dll = SystemInfo.gadget\WMI.dll
 		SystemInfo.gadget\wmi.js = SystemInfo.gadget\wmi.js
 		SystemInfo.gadget\workwithlibrary.js = SystemInfo.gadget\workwithlibrary.js
 	EndProjectSection
