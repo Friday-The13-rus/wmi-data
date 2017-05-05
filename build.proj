@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Start">
+  <PropertyGroup>
+    <ReleaseDir>Release</ReleaseDir>
+    <TempDir>build</TempDir>
+    <WmiProjectDir>WMI\WMI</WmiProjectDir>
+  </PropertyGroup>
+
+
+  <!-- "Autostart" -->
+  <Target Name="Start">
+    <RemoveDir Directories="$(ReleaseDir)"/>
+    <MakeDir Directories="$(ReleaseDir)"/>
+    <MakeDir Directories="$(TempDir)"/>
+
+    <MSBuild Projects="$(WmiProjectDir)\WMI.csproj" Properties="Configuration=Release;OutputPath=..\..\$(TempDir)"/>
+    <CallTarget Targets="CopyRelease"/>
+    <ZipDir ZipFileName="$(ReleaseDir)\SystemInfo.gadget" DirectoryName="$(TempDir)"/>
+    <RemoveDir Directories="$(TempDir)"/>
+  </Target>
+
+  <Target Name="CopyRelease">
+    <ItemGroup>
+      <AdditionalFiles Include="SystemInfo.gadget\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(AdditionalFiles)" DestinationFiles="@(AdditionalFiles->'$(TempDir)\%(RecursiveDir)%(Filename)%(Extension)')"/>
+  </Target>
+
+  <UsingTask TaskName="ZipDir" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <ZipFileName ParameterType="System.String" Required="true" />
+      <DirectoryName ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.IO.Compression.FileSystem" />
+      <Using Namespace="System.IO.Compression" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+      try
+      {
+        Log.LogMessage(string.Format("Zipping Directory {0} to {1}", DirectoryName, ZipFileName));
+        ZipFile.CreateFromDirectory( DirectoryName, ZipFileName );
+        return true;
+      }
+      catch(Exception ex)
+      {
+        Log.LogErrorFromException(ex);
+        return false;
+      }
+    ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+</Project>
