@@ -190,13 +190,14 @@ function DriveObj() {
 			drives[i].VolumeName = temp.volumeName;
 			drives[i].UsePercent = temp.usePercent;
 			drives[i].ActivePercent = temp.activePercent;
+			drives[i].DrileLetter = temp.driveLetter;
 		}
 	}
 
 	this.Draw = function () {
 		for (i = 0; i < this.DrivesCount() ; i++) {
 			var drive = document.getElementById('Drive' + i);
-			var driveName = drives[i].Name + ' ' + drives[i].VolumeName;
+			var driveName = drives[i].VolumeName + ' (' + drives[i].DrileLetter + ')';
 			drive.setAttribute(pathAttributeName, drives[i].Name);
 			drive.onclick = OpenDrive;
 			drive.title = driveName + '\r\n' +

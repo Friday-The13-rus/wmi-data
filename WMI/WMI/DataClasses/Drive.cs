@@ -9,6 +9,7 @@ namespace WMI.DataClasses
 		public string VolumeName { get; set; }
 		public ulong FreeSpace { get; set; }
 		public ulong Space { get; set; }
+		public string DriveLetter { get; set; }
 
 		public byte UsePercent
 		{
