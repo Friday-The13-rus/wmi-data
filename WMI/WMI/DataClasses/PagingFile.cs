@@ -9,6 +9,6 @@ namespace WMI.DataClasses
 	[ComVisible(true), ClassInterface(ClassInterfaceType.AutoDual)]
 	public class PagingFile : NamedObject
 	{
-		public byte UsagePercent { get; set; }
+		public uint UsagePercent { get; set; }
 	}
 }
