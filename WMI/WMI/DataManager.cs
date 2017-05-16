@@ -12,6 +12,7 @@ namespace WMI
 		private readonly IDataProvider<Drive> _drivesDataProvider;
 		private readonly IDataProvider<NetworkInterface> _networkDataProvider;
 		private readonly IDataProvider<Ram> _ramDataProvider;
+		private readonly IDataProvider<PagingFile> _pagingFileDataProvider;
 
 		private bool _disposed;
 
@@ -21,6 +22,7 @@ namespace WMI
 			_drivesDataProvider = new DrivesDataProvider(updateInterval);
 			_networkDataProvider = new NetworkDataProvider(updateInterval);
 			_ramDataProvider = new RamDataProvider(updateInterval);
+			_pagingFileDataProvider = new PagingFileDataProvider(updateInterval);
 		}
 
 		public void Dispose()
@@ -31,6 +33,7 @@ namespace WMI
 				_drivesDataProvider.Dispose();
 				_networkDataProvider.Dispose();
 				_ramDataProvider.Dispose();
+				_pagingFileDataProvider.Dispose();
 
 				_disposed = true;
 			}
@@ -60,6 +63,16 @@ namespace WMI
 		public bool HasRamData()
 		{
 			return _ramDataProvider.Count != 0;
+		}
+
+		public PagingFile GetPagingFileData()
+		{
+			return _pagingFileDataProvider[0];
+		}
+
+		public bool HasPagingFileData()
+		{
+			return _pagingFileDataProvider.Count != 0;
 		}
 	}
 }

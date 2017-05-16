@@ -59,6 +59,7 @@ function RamObj() {
 	var total = 0;
 	var use = 0;
 	var percentUse = 0;
+	var pagingFileUsagePercent = 0;
 
 	freeRam.innerHTML = '0 Мб';
 	ramDiv.innerHTML =
@@ -66,17 +67,25 @@ function RamObj() {
 		'<div style="top:' + (0 * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
 			'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px" class="barBackground"/>' +
 			'<img id="percentUseRamWidth" src="Images/Bars/ram1.png" class="barActivity"/>' +
+		'</div>' + 
+		'<div id="pagingFileUsagePercentCaption" style="top:' + (1 * rowHeight) + 'px; left:3px; width:30px">0 %</div>' +
+		'<div style="top:' + (1 * rowHeight) + 'px; width:' + widthBar + 'px; margin: 2px 0 0 35px;">' +
+			'<img src="Images/Bars/back1.png" style="width:' + widthBar + 'px" class="barBackground"/>' +
+			'<img id="pagingFileUsagePercentWidth" src="Images/Bars/ram1.png" class="barActivity"/>' +
 		'</div>';
 
 	this.Update = function () {
-		if (!wmi.NetLib.HasRamData())
-			return;
-
-		var ramInfo = wmi.NetLib.GetRamData();
-		total = formatBytes(ramInfo.Total, 'kb');
-		free = formatBytes(ramInfo.Free, 'kb');
-		use = formatBytes(ramInfo.InUse, 'kb');
-		percentUse = (100 * ramInfo.InUse / ramInfo.Total).toFixed();
+		if (wmi.NetLib.HasRamData()) {
+			var ramInfo = wmi.NetLib.GetRamData();
+			total = formatBytes(ramInfo.Total, 'kb');
+			free = formatBytes(ramInfo.Free, 'kb');
+			use = formatBytes(ramInfo.InUse, 'kb');
+			percentUse = (100 * ramInfo.InUse / ramInfo.Total).toFixed();
+		}
+		if (wmi.NetLib.HasPagingFileData()) {
+			var pagingFileInfo = wmi.NetLib.GetPagingFileData();
+			pagingFileUsagePercent = pagingFileInfo.UsagePercent;
+		}
 	}
 
 	this.Draw = function () {
@@ -87,6 +96,9 @@ function RamObj() {
 			'Всего памяти: ' + total + '\r\n' +
 			'Занято памяти: ' + use + '\r\n' +
 			'Свободно памяти: ' + free;
+
+		pagingFileUsagePercentCaption.innerHTML = pagingFileUsagePercent + ' %';
+		pagingFileUsagePercentWidth.style.width = CalcWidthBar(pagingFileUsagePercent);
 	}
 }
 
@@ -320,7 +332,7 @@ function CalculateHeight() {
 	var drivesCount = dataElements[2].DrivesCount();
 
 	cpuSect.style.height = 18 + coresCount * rowHeight;
-	ramSect.style.height = 18 + 1 * rowHeight;
+	ramSect.style.height = 18 + 2 * rowHeight;
 	hddSect.style.height = 3 * drivesCount * (rowHeight + 1);
 	networkSect.style.height = 18 + 1 * rowHeight;
 	document.body.style.height =

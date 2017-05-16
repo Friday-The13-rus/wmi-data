@@ -46,5 +46,15 @@ namespace WMI
 		{
 			return GlobalObject.Array.ConstructArray(_data.GetNetworkData());
 		}
+
+		public PagingFile GetPagingFileData()
+		{
+			return _data.GetPagingFileData();
+		}
+
+		public bool HasPagingFileData()
+		{
+			return _data.HasPagingFileData();
+		}
 	}
 }

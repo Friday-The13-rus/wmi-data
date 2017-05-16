@@ -10,5 +10,7 @@ namespace WMI
 		NetworkInterface[] GetNetworkData();
 		Ram GetRamData();
 		bool HasRamData();
+		PagingFile GetPagingFileData();
+		bool HasPagingFileData();
 	}
 }
