@@ -15,7 +15,7 @@ namespace WMI.DataProviders
 					{"Label", (drive, o) => drive.VolumeName = (string) o},
 					{"Capacity", (drive, o) => drive.Space = (ulong) o},
 					{"DriveLetter", (drive, o) => drive.DriveLetter = (string) o}
-				}, "SystemVolume = false", canRemoveElements: true);
+				}, "Name != DeviceID AND Capacity IS NOT NULL", canRemoveElements: true);
 			AddSearcher("Win32_PerfFormattedData_PerfDisk_LogicalDisk",
 				new PropertySettersDictionary<Drive>()
 				{
