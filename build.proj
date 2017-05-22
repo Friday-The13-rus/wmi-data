@@ -21,7 +21,7 @@
 
   <Target Name="CopyRelease">
     <ItemGroup>
-      <AdditionalFiles Include="SystemInfo.gadget\**\*.*"/>
+      <AdditionalFiles Include="GadgetUI\**\*.*"/>
     </ItemGroup>
     <Copy SourceFiles="@(AdditionalFiles)" DestinationFiles="@(AdditionalFiles->'$(TempDir)\%(RecursiveDir)%(Filename)%(Extension)')"/>
   </Target>

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f94267f4-24f6-465f-95a7-410f7097cb51</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>GadgetUI</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)elements.css" />
+    <Content Include="$(MSBuildThisFileDirectory)gadget.xml" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\Bars\back1.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\Bars\cpu1.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\Bars\hdd1.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\Bars\hdd2.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\Bars\ram1.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\bg4.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\bg41.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\bg42.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\down.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\horizontalDivider.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\icon.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Images\up.png" />
+    <Content Include="$(MSBuildThisFileDirectory)main.css" />
+    <Content Include="$(MSBuildThisFileDirectory)Main.html" />
+    <Content Include="$(MSBuildThisFileDirectory)settings.css" />
+    <Content Include="$(MSBuildThisFileDirectory)settings.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)common.js" />
+    <None Include="$(MSBuildThisFileDirectory)main.js" />
+    <None Include="$(MSBuildThisFileDirectory)settings.js" />
+    <None Include="$(MSBuildThisFileDirectory)settingsIO.js" />
+    <None Include="$(MSBuildThisFileDirectory)wmi.js" />
+    <None Include="$(MSBuildThisFileDirectory)workwithlibrary.js" />
+  </ItemGroup>
+</Project>
